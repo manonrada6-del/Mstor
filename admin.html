@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم | إدارة المتجر</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Tahoma', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: #0a0a0a;
+      direction: rtl;
+      color: #e0e0e0;
+    }
+
+    header {
+      background: #0a0a12;
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    header h1 {
+      font-size: 28px;
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .back-to-store {
+      background: rgba(30, 30, 45, 0.8);
+      padding: 10px 25px;
+      border-radius: 50px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .back-to-store:hover {
+      background: #1e1e2f;
+      transform: scale(1.02);
+    }
+
+    .dashboard-container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* نموذج إضافة منتج */
+    .add-product-form {
+      background: linear-gradient(145deg, #13131f, #0c0c16);
+      border-radius: 32px;
+      padding: 35px;
+      margin-bottom: 40px;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .add-product-form h2 {
+      color: #c084fc;
+      margin-bottom: 25px;
+      font-size: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #9ca3af;
+      font-weight: 500;
+    }
+
+    .add-product-form input {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(10, 10, 20, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      color: white;
+      font-size: 14px;
+    }
+
+    .add-product-form input:focus {
+      border-color: #a855f7;
+      outline: none;
+    }
+
+    .add-product-form button {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      padding: 14px 32px;
+      border: none;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.2s;
+      margin-top: 10px;
+    }
+
+    .add-product-form button:hover {
+      transform: scale(1.02);
+    }
+
+    /* قائمة المنتجات */
+    .products-list-admin {
+      background: rgba(18, 18, 30, 0.7);
+      border-radius: 32px;
+      padding: 30px;
+    }
+
+    .products-list-admin h2 {
+      color: #c084fc;
+      margin-bottom: 25px;
+      font-size: 28px;
+    }
+
+    .admin-product-item {
+      background: rgba(0, 0, 0, 0.3);
+      margin: 12px 0;
+      padding: 18px 22px;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      transition: 0.2s;
+    }
+
+    .admin-product-item:hover {
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .admin-product-info {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .admin-product-name {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .admin-product-price {
+      color: #c084fc;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .delete-product-btn {
+      background: #dc2626;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 40px;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: bold;
+    }
+
+    .delete-product-btn:hover {
+      background: #b91c1c;
+      transform: scale(0.96);
+    }
+
+    .empty-products {
+      text-align: center;
+      padding: 40px;
+      color: #9ca3af;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e1b2e;
+      backdrop-filter: blur(20px);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 60px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      animation: slideUpFade 0.4s ease forwards;
+      z-index: 1000;
+      font-weight: 600;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    @keyframes slideUpFade {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    @media (max-width: 750px) {
+      header {
+        padding: 15px 20px;
+      }
+      .add-product-form, .products-list-admin {
+        padding: 20px;
+      }
+      .admin-product-item {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📊 لوحة تحكم المدير</h1>
+  <a href="index.html" class="back-to-store">🏠 العودة للمتجر</a>
+</header>
+
+<div class="dashboard-container">
+  <!-- نموذج إضافة منتج -->
+  <div class="add-product-form">
+    <h2>➕ إضافة منتج جديد</h2>
+    <div class="form-group">
+      <label>اسم المنتج</label>
+      <input type="text" id="prodName" placeholder="مثال: حذاء رياضي">
+    </div>
+    <div class="form-group">
+      <label>السعر (بالدولار)</label>
+      <input type="number" id="prodPrice" placeholder="مثال: 120">
+    </div>
+    <div class="form-group">
+      <label>رابط الصورة (اختياري)</label>
+      <input type="text" id="prodImage" placeholder="https://example.com/image.jpg">
+    </div>
+    <button onclick="addProductToFirebase()">✨ إضافة المنتج</button>
+  </div>
+
+  <!-- قائمة المنتجات الحالية -->
+  <div class="products-list-admin">
+    <h2>📋 قائمة المنتجات</h2>
+    <div id="adminProductsList">
+      <div class="empty-products">جاري التحميل...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // تهيئة Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0p0us6BuzD2ngzjhRnmUIhlOcBeRp0vQ",
+    authDomain: "tok-tak-d6e17.firebaseapp.com",
+    databaseURL: "https://tok-tak-d6e17-default-rtdb.firebaseio.com",
+    projectId: "tok-tak-d6e17",
+    storageBucket: "tok-tak-d6e17.appspot.com",
+    messagingSenderId: "547062578826",
+    appId: "1:547062578826:web:aa285cf798341be07cb773",
+    measurementId: "G-7EMKEQKPVV"
+  };
+  
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+  
+  let products = [];
+
+  // تحميل المنتجات من Firebase
+  function loadProductsFromFirebase() {
+    database.ref('products').on('value', (snapshot) => {
+      const data = snapshot.val();
+      products = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          products.push({ id: key, ...data[key] });
+        });
+      }
+      displayAdminProducts();
+    });
+  }
+
+  // عرض المنتجات في لوحة التحكم
+  function displayAdminProducts() {
+    const adminList = document.getElementById("adminProductsList");
+    if (!adminList) return;
+    adminList.innerHTML = "";
+    
+    if (products.length === 0) {
+      adminList.innerHTML = "<div class='empty-products'>📦 لا توجد منتجات، أضف منتجاً جديداً</div>";
+      return;
+    }
+    
+    products.forEach(product => {
+      const div = document.createElement("div");
+      div.className = "admin-product-item";
+      div.innerHTML = `
+        <div class="admin-product-info">
+          <span class="admin-product-name">🛍️ ${product.name}</span>
+          <span class="admin-product-price">${product.price}$</span>
+        </div>
+        <button class="delete-product-btn" onclick="deleteProductFromFirebase('${product.id}', '${product.name.replace(/'/g, "\\'")}')">🗑️ حذف</button>
+      `;
+      adminList.appendChild(div);
+    });
+  }
+
+  // إضافة منتج إلى Firebase
+  function addProductToFirebase() {
+    const name = document.getElementById("prodName").value.trim();
+    const price = document.getElementById("prodPrice").value;
+    const image = document.getElementById("prodImage").value.trim();
+    
+    if (!name || !price) {
+      showToast("⚠️ الرجاء إدخال اسم المنتج والسعر", "#f97316");
+      return;
+    }
+    
+    if (isNaN(price) || price <= 0) {
+      showToast("⚠️ الرجاء إدخال سعر صحيح", "#f97316");
+      return;
+    }
+    
+    const newProduct = {
+      name: name,
+      price: parseFloat(price),
+      image: image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+      createdAt: Date.now()
+    };
+    
+    database.ref('products').push(newProduct).then(() => {
+      showToast("✅ تم إضافة المنتج بنجاح!", "#10b981");
+      document.getElementById("prodName").value = "";
+      document.getElementById("prodPrice").value = "";
+      document.getElementById("prodImage").value = "";
+    }).catch(error => {
+      showToast("❌ خطأ في الإضافة: " + error.message, "#ef4444");
+    });
+  }
+
+  // حذف منتج من Firebase
+  function deleteProductFromFirebase(id, productName) {
+    if (confirm(`⚠️ هل تريد حذف المنتج "${productName}" نهائياً؟`)) {
+      database.ref('products/' + id).remove().then(() => {
+        showToast(`🗑️ تم حذف ${productName}`, "#ef4444");
+      }).catch(error => {
+        showToast("❌ خطأ في الحذف", "#ef4444");
+      });
+    }
+  }
+
+  // رسائل منبثقة
+  function showToast(message, bgColor) {
+    const oldToast = document.querySelector(".toast");
+    if (oldToast) oldToast.remove();
+    
+    let toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerText = message;
+    toast.style.background = bgColor;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      if (toast && toast.remove) toast.remove();
+    }, 2500);
+  }
+
+  // تحميل البيانات
+  loadProductsFromFirebase();
+</script>
+</body>
+  </html>
