@@ -81,7 +81,7 @@
     .cart-items-list {
       list-style: none;
       margin: 25px 0;
-      max-height: 500px;
+      max-height: 400px;
       overflow-y: auto;
     }
 
@@ -119,7 +119,7 @@
     }
 
     .cart-item-name {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
     }
 
@@ -173,8 +173,87 @@
       transform: scale(0.96);
     }
 
-    .cart-summary {
+    /* نموذج بيانات العميل */
+    .checkout-section {
       margin-top: 30px;
+      padding-top: 25px;
+      border-top: 2px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .checkout-title {
+      font-size: 24px;
+      color: #c084fc;
+      margin-bottom: 20px;
+    }
+
+    .customer-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: #e2e8f0;
+      font-size: 14px;
+    }
+
+    .form-group input, .form-group textarea {
+      padding: 14px 18px;
+      background: rgba(10, 10, 20, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      color: white;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: #a855f7;
+      outline: none;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .checkout-btn {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      padding: 16px 32px;
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .checkout-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+    }
+
+    .checkout-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .cart-summary {
+      margin-top: 25px;
       padding-top: 20px;
       border-top: 2px solid rgba(139, 92, 246, 0.3);
       display: flex;
@@ -185,10 +264,10 @@
     }
 
     .total-price {
-      font-size: 32px;
+      font-size: 28px;
       color: #facc15;
       background: rgba(0, 0, 0, 0.5);
-      padding: 12px 32px;
+      padding: 10px 28px;
       border-radius: 60px;
       font-weight: 800;
     }
@@ -196,7 +275,7 @@
     .clear-cart-btn {
       background: #2d2d44;
       border: 1px solid rgba(255, 100, 100, 0.3);
-      padding: 14px 32px;
+      padding: 12px 28px;
       border-radius: 50px;
       font-weight: bold;
       cursor: pointer;
@@ -257,6 +336,9 @@
       .cart-summary {
         flex-direction: column;
       }
+      .total-price {
+        font-size: 22px;
+      }
     }
   </style>
 </head>
@@ -277,6 +359,9 @@
 <script>
   let cart = [];
 
+  // رقم الواتساب المطلوب
+  const WHATSAPP_NUMBER = "01016211389";
+
   // تحميل السلة من localStorage
   function loadCart() {
     const savedCart = localStorage.getItem("darkStoreCart");
@@ -288,7 +373,7 @@
     displayCart();
   }
 
-  // عرض السلة
+  // عرض السلة مع نموذج إتمام الطلب
   function displayCart() {
     const cartContent = document.getElementById("cartContent");
     if (!cartContent) return;
@@ -307,7 +392,7 @@
       cartHtml += `
         <li class="cart-item">
           <div class="cart-item-info">
-            <span class="cart-item-name">${item.name}</span>
+            <span class="cart-item-name">${escapeHtml(item.name)}</span>
             <span class="cart-item-price">${item.price}$</span>
             <div class="cart-item-quantity">
               <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">−</button>
@@ -321,14 +406,47 @@
     });
     
     cartHtml += `</ul>`;
+    
+    // إضافة ملخص السلة
     cartHtml += `
       <div class="cart-summary">
         <div class="total-price">💰 الإجمالي: ${totalPrice}$</div>
-        <button class="clear-cart-btn" onclick="clearCart()">🗑️ تفريغ السلة بالكامل</button>
+        <button class="clear-cart-btn" onclick="clearCart()">🗑️ تفريغ السلة</button>
+      </div>
+    `;
+    
+    // إضافة نموذج بيانات العميل لإتمام الطلب
+    cartHtml += `
+      <div class="checkout-section">
+        <div class="checkout-title">📋 إتمام الطلب</div>
+        <div class="customer-form">
+          <div class="form-group">
+            <label>👤 الاسم الكامل</label>
+            <input type="text" id="customerName" placeholder="أدخل اسمك الكامل">
+          </div>
+          <div class="form-group">
+            <label>📞 رقم الهاتف</label>
+            <input type="tel" id="customerPhone" placeholder="مثال: 01012345678">
+          </div>
+          <div class="form-group">
+            <label>📍 العنوان (المدينة - الحي - الشارع)</label>
+            <textarea id="customerAddress" placeholder="أدخل عنوانك بالتفصيل"></textarea>
+          </div>
+          <button class="checkout-btn" onclick="sendToWhatsApp()">
+            💬 إتمام الطلب عبر واتساب
+          </button>
+        </div>
       </div>
     `;
     
     cartContent.innerHTML = cartHtml;
+  }
+
+  // دالة لحماية النصوص من الـ XSS
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   // تحديث كمية منتج
@@ -366,9 +484,98 @@
     showToast("🧹 تم تفريغ السلة بالكامل", "#dc2626");
   }
 
-  // حفظ السلة
+  // حفظ السلة في localStorage
   function saveCart() {
     localStorage.setItem("darkStoreCart", JSON.stringify(cart));
+  }
+
+  // إرسال الطلب عبر واتساب
+  function sendToWhatsApp() {
+    const customerName = document.getElementById("customerName")?.value.trim();
+    const customerPhone = document.getElementById("customerPhone")?.value.trim();
+    const customerAddress = document.getElementById("customerAddress")?.value.trim();
+    
+    // التحقق من صحة البيانات
+    if (!customerName) {
+      showToast("⚠️ الرجاء إدخال الاسم الكامل", "#f97316");
+      document.getElementById("customerName")?.focus();
+      return;
+    }
+    
+    if (!customerPhone) {
+      showToast("⚠️ الرجاء إدخال رقم الهاتف", "#f97316");
+      document.getElementById("customerPhone")?.focus();
+      return;
+    }
+    
+    // التحقق من صيغة رقم الهاتف (أرقام فقط وليس أقل من 10 أرقام)
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(customerPhone.replace(/[^0-9]/g, ''))) {
+      showToast("⚠️ الرجاء إدخال رقم هاتف صحيح (10-11 رقم)", "#f97316");
+      return;
+    }
+    
+    if (!customerAddress) {
+      showToast("⚠️ الرجاء إدخال العنوان", "#f97316");
+      document.getElementById("customerAddress")?.focus();
+      return;
+    }
+    
+    // حساب إجمالي الطلب
+    let totalPrice = 0;
+    let orderDetails = "";
+    
+    cart.forEach((item, index) => {
+      const itemTotal = item.price * item.quantity;
+      totalPrice += itemTotal;
+      orderDetails += `${index + 1}️⃣ ${item.name} | ${item.price}$ × ${item.quantity} = ${itemTotal}$\n`;
+    });
+    
+    // إنشاء رسالة الواتساب
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${currentDate.getMonth()+1}-${currentDate.getDate()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+    
+    const message = `🛍️ *طلب جديد من المتجر*\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 *اسم العميل:* ${customerName}\n` +
+      `📞 *رقم الجوال:* ${customerPhone}\n` +
+      `📍 *العنوان:* ${customerAddress}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📦 *تفاصيل الطلب:*\n${orderDetails}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `💰 *الإجمالي:* ${totalPrice}$\n` +
+      `🕐 *تاريخ الطلب:* ${formattedDate}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `✅ يرجى التواصل مع العميل لتأكيد الطلب.`;
+    
+    // ترميز الرسالة للـ URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // فتح رابط واتساب
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+    
+    // حفظ الطلب في localStorage كسجل (اختياري)
+    const orderHistory = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+    orderHistory.push({
+      id: Date.now(),
+      customerName,
+      customerPhone,
+      customerAddress,
+      items: [...cart],
+      total: totalPrice,
+      date: formattedDate
+    });
+    localStorage.setItem("orderHistory", JSON.stringify(orderHistory));
+    
+    // فتح الواتساب في نافذة جديدة
+    window.open(whatsappUrl, '_blank');
+    
+    // تفريغ السلة بعد إتمام الطلب
+    cart = [];
+    saveCart();
+    displayCart();
+    
+    showToast("✅ تم إرسال طلبك بنجاح! سيتم تحويلك إلى واتساب", "#25D366");
   }
 
   // رسائل منبثقة
@@ -384,7 +591,7 @@
     
     setTimeout(() => {
       if (toast && toast.remove) toast.remove();
-    }, 2500);
+    }, 3000);
   }
 
   // تحميل الصفحة
