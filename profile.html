@@ -98,13 +98,6 @@
       background: linear-gradient(135deg, #8b5cf6, #ec4899);
     }
 
-    .logout-btn {
-      background: rgba(220, 38, 38, 0.8);
-    }
-    .logout-btn:hover {
-      background: #dc2626;
-    }
-
     /* المحتوى الرئيسي */
     .profile-wrapper {
       max-width: 1300px;
@@ -112,8 +105,8 @@
       padding: 40px;
     }
 
-    /* صفحة تسجيل الدخول */
-    .auth-container {
+    /* صفحة البحث عن العميل */
+    .search-section {
       min-height: calc(100vh - 80px);
       display: flex;
       justify-content: center;
@@ -121,57 +114,57 @@
       padding: 40px;
     }
 
-    .auth-card {
+    .search-card {
       background: linear-gradient(145deg, #13131f, #0c0c16);
       border-radius: 48px;
       padding: 50px;
-      max-width: 450px;
+      max-width: 500px;
       width: 100%;
       text-align: center;
       border: 1px solid rgba(139, 92, 246, 0.2);
       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
     }
 
-    .auth-icon {
+    .search-icon {
       font-size: 60px;
       color: #c084fc;
       margin-bottom: 20px;
     }
 
-    .auth-title {
+    .search-title {
       font-size: 28px;
       font-weight: 700;
       margin-bottom: 10px;
     }
 
-    .auth-subtitle {
+    .search-subtitle {
       color: #a0a0b0;
       margin-bottom: 30px;
     }
 
-    .input-group {
-      margin-bottom: 20px;
-      text-align: right;
+    .phone-input-group {
+      margin-bottom: 25px;
     }
 
-    .input-group input {
+    .phone-input-group input {
       width: 100%;
-      padding: 15px 18px;
+      padding: 15px 20px;
       background: rgba(10, 10, 20, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+      border-radius: 25px;
       color: white;
-      font-size: 15px;
+      font-size: 16px;
+      text-align: center;
       transition: all 0.3s;
     }
 
-    .input-group input:focus {
+    .phone-input-group input:focus {
       border-color: #8b5cf6;
       outline: none;
       box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
     }
 
-    .auth-btn {
+    .search-btn {
       width: 100%;
       background: linear-gradient(135deg, #8b5cf6, #ec4899);
       border: none;
@@ -182,20 +175,10 @@
       font-size: 16px;
       cursor: pointer;
       transition: all 0.3s;
-      margin-top: 10px;
     }
 
-    .auth-btn:hover {
+    .search-btn:hover {
       transform: scale(1.02);
-    }
-
-    .switch-auth {
-      margin-top: 25px;
-      color: #a0a0b0;
-    }
-    .switch-auth span {
-      color: #c084fc;
-      cursor: pointer;
     }
 
     /* بروفايل العميل */
@@ -284,7 +267,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* نموذج个人信息 */
+    /* نموذج المعلومات */
     .info-form {
       background: rgba(15, 15, 25, 0.6);
       backdrop-filter: blur(10px);
@@ -407,6 +390,27 @@
       cursor: pointer;
     }
 
+    .logout-area {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .change-phone-btn {
+      background: rgba(220, 38, 38, 0.8);
+      border: none;
+      padding: 12px 30px;
+      border-radius: 40px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .change-phone-btn:hover {
+      background: #dc2626;
+    }
+
     .toast {
       position: fixed;
       bottom: 30px;
@@ -429,6 +433,7 @@
       .profile-wrapper { padding: 20px; }
       .profile-header { flex-direction: column; text-align: center; }
       .tabs { justify-content: center; }
+      .search-card { padding: 30px; margin: 20px; }
     }
   </style>
 </head>
@@ -447,34 +452,19 @@
     <a href="cart.html" class="nav-btn"><i class="fas fa-shopping-cart"></i> السلة</a>
     <a href="profile.html" class="nav-btn active"><i class="fas fa-user"></i> بروفايلي</a>
     <a href="reports.html" class="nav-btn"><i class="fas fa-chart-pie"></i> التقارير</a>
-    <button id="logoutNavBtn" class="nav-btn logout-btn" onclick="logout()" style="display:none;"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</button>
   </div>
 </header>
 
-<!-- صفحة تسجيل الدخول/التسجيل -->
-<div id="authSection" class="auth-container">
-  <div class="auth-card">
-    <div class="auth-icon"><i class="fas fa-user-astronaut"></i></div>
-    <div class="auth-title" id="authTitle">تسجيل الدخول</div>
-    <div class="auth-subtitle">مرحباً بك في متجر دارك</div>
-    
-    <div id="loginForm">
-      <div class="input-group"><input type="text" id="loginPhone" placeholder="رقم الجوال"></div>
-      <div class="input-group"><input type="password" id="loginPassword" placeholder="كلمة المرور"></div>
-      <button class="auth-btn" onclick="login()"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button>
+<!-- صفحة البحث عن العميل برقم الجوال -->
+<div id="searchSection" class="search-section">
+  <div class="search-card">
+    <div class="search-icon"><i class="fas fa-id-card"></i></div>
+    <div class="search-title">بروفايل العميل</div>
+    <div class="search-subtitle">أدخل رقم جوالك لعرض بياناتك وطلباتك السابقة</div>
+    <div class="phone-input-group">
+      <input type="tel" id="searchPhone" placeholder="مثال: 01012345678" maxlength="11">
     </div>
-    
-    <div id="registerForm" style="display:none;">
-      <div class="input-group"><input type="text" id="regName" placeholder="الاسم الكامل"></div>
-      <div class="input-group"><input type="text" id="regPhone" placeholder="رقم الجوال"></div>
-      <div class="input-group"><input type="password" id="regPassword" placeholder="كلمة المرور"></div>
-      <div class="input-group"><input type="text" id="regAddress" placeholder="العنوان"></div>
-      <button class="auth-btn" onclick="register()"><i class="fas fa-user-plus"></i> إنشاء حساب</button>
-    </div>
-    
-    <div class="switch-auth">
-      ليس لديك حساب؟ <span id="switchToRegister" onclick="toggleAuth()">إنشاء حساب جديد</span>
-    </div>
+    <button class="search-btn" onclick="searchCustomer()"><i class="fas fa-search"></i> عرض بروفايلي</button>
   </div>
 </div>
 
@@ -493,7 +483,7 @@
     <div class="profile-stats">
       <div class="stat-box"><div class="stat-number" id="totalOrdersCount">0</div><div>عدد الطلبات</div></div>
       <div class="stat-box"><div class="stat-number" id="totalSpent">0</div><div>إجمالي المشتريات</div></div>
-      <div class="stat-box"><div class="stat-number" id="memberSince">-</div><div>عضو منذ</div></div>
+      <div class="stat-box"><div class="stat-number" id="memberSince">-</div><div>أول طلب</div></div>
     </div>
 
     <div class="tabs">
@@ -509,12 +499,15 @@
       <div class="info-form">
         <div class="form-row">
           <div class="form-field"><label>الاسم الكامل</label><input type="text" id="editName"></div>
-          <div class="form-field"><label>رقم الجوال</label><input type="tel" id="editPhone"></div>
+          <div class="form-field"><label>رقم الجوال</label><input type="tel" id="editPhone" readonly style="background:#1a1a2e; opacity:0.7;"></div>
         </div>
         <div class="form-field"><label>العنوان</label><textarea id="editAddress" rows="3"></textarea></div>
-        <div class="form-field"><label>كلمة المرور الجديدة (اترك فارغاً إذا لم تريد التغيير)</label><input type="password" id="editPassword"></div>
         <button class="save-btn" onclick="updateProfile()"><i class="fas fa-save"></i> حفظ التغييرات</button>
       </div>
+    </div>
+
+    <div class="logout-area">
+      <button class="change-phone-btn" onclick="changePhone()"><i class="fas fa-arrow-right"></i> البحث برقم آخر</button>
     </div>
   </div>
 </div>
@@ -542,114 +535,95 @@
   firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
 
-  let currentUser = null;
+  let currentCustomer = null;
+  let currentPhone = null;
 
-  // تحميل المستخدم من localStorage
-  function loadCurrentUser() {
-    const saved = localStorage.getItem("currentUser");
-    if (saved) {
-      try {
-        currentUser = JSON.parse(saved);
-        showProfile();
-      } catch(e) {}
+  // البحث عن العميل
+  function searchCustomer() {
+    const phone = document.getElementById("searchPhone").value.trim();
+    if (!phone) {
+      showToast("⚠️ الرجاء إدخال رقم الجوال", "#f97316");
+      return;
     }
-  }
+    
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(phone)) {
+      showToast("⚠️ رقم الجوال غير صحيح (10-11 رقم)", "#f97316");
+      return;
+    }
 
-  // تسجيل الدخول
-  function login() {
-    const phone = document.getElementById("loginPhone").value.trim();
-    const password = document.getElementById("loginPassword").value;
-    if (!phone || !password) { showToast("⚠️ أدخل رقم الجوال وكلمة المرور", "#f97316"); return; }
-
-    database.ref('users').orderByChild('phone').equalTo(phone).once('value', (snapshot) => {
+    currentPhone = phone;
+    
+    // البحث في Firebase عن العميل
+    database.ref('customers').orderByChild('phone').equalTo(phone).once('value', (snapshot) => {
       const data = snapshot.val();
-      let found = false;
       if (data) {
+        // عميل موجود
         Object.keys(data).forEach(key => {
-          const user = data[key];
-          if (user.password === password) {
-            found = true;
-            currentUser = { id: key, ...user };
-            localStorage.setItem("currentUser", JSON.stringify(currentUser));
-            showProfile();
-            showToast("✅ تم تسجيل الدخول بنجاح", "#10b981");
-          }
+          currentCustomer = { id: key, ...data[key] };
+        });
+        showProfile();
+      } else {
+        // عميل جديد - إنشاء حساب
+        const newCustomer = {
+          name: "عميل جديد",
+          phone: phone,
+          address: "",
+          createdAt: new Date().toISOString(),
+          totalSpent: 0
+        };
+        database.ref('customers').push(newCustomer).then((res) => {
+          currentCustomer = { id: res.key, ...newCustomer };
+          showProfile();
+          showToast("✅ مرحباً بك! يمكنك تحديث بياناتك", "#10b981");
         });
       }
-      if (!found) showToast("❌ رقم الجوال أو كلمة المرور غير صحيحة", "#ef4444");
     });
-  }
-
-  // تسجيل حساب جديد
-  function register() {
-    const name = document.getElementById("regName").value.trim();
-    const phone = document.getElementById("regPhone").value.trim();
-    const password = document.getElementById("regPassword").value;
-    const address = document.getElementById("regAddress").value.trim();
-
-    if (!name || !phone || !password) { showToast("⚠️ جميع الحقول مطلوبة", "#f97316"); return; }
-
-    database.ref('users').orderByChild('phone').equalTo(phone).once('value', (snapshot) => {
-      if (snapshot.exists()) {
-        showToast("❌ هذا الرقم مسجل بالفعل", "#ef4444");
-        return;
-      }
-      const newUser = { name, phone, password, address, createdAt: new Date().toISOString(), totalSpent: 0, orders: [] };
-      database.ref('users').push(newUser).then((res) => {
-        currentUser = { id: res.key, ...newUser };
-        localStorage.setItem("currentUser", JSON.stringify(currentUser));
-        showProfile();
-        showToast("✅ تم إنشاء الحساب بنجاح", "#10b981");
-      });
-    });
-  }
-
-  // تسجيل الخروج
-  function logout() {
-    currentUser = null;
-    localStorage.removeItem("currentUser");
-    document.getElementById("profileSection").style.display = "none";
-    document.getElementById("authSection").style.display = "flex";
-    document.getElementById("logoutNavBtn").style.display = "none";
-    showToast("👋 تم تسجيل الخروج", "#6b7280");
   }
 
   // عرض البروفايل
   function showProfile() {
-    document.getElementById("authSection").style.display = "none";
+    document.getElementById("searchSection").style.display = "none";
     document.getElementById("profileSection").style.display = "block";
-    document.getElementById("logoutNavBtn").style.display = "flex";
     
-    document.getElementById("welcomeName").innerHTML = `مرحباً، ${currentUser.name}`;
-    document.getElementById("userAddress").innerHTML = currentUser.address || "لم يتم الإضافة";
-    document.getElementById("userPhone").innerHTML = currentUser.phone;
+    document.getElementById("welcomeName").innerHTML = `مرحباً، ${currentCustomer.name || "عميلنا العزيز"}`;
+    document.getElementById("userAddress").innerHTML = currentCustomer.address || "لم يتم الإضافة";
+    document.getElementById("userPhone").innerHTML = currentCustomer.phone;
     
-    document.getElementById("editName").value = currentUser.name;
-    document.getElementById("editPhone").value = currentUser.phone;
-    document.getElementById("editAddress").value = currentUser.address || "";
-    document.getElementById("editPassword").value = "";
+    document.getElementById("editName").value = currentCustomer.name || "";
+    document.getElementById("editPhone").value = currentCustomer.phone;
+    document.getElementById("editAddress").value = currentCustomer.address || "";
     
-    const memberDate = currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('ar') : "اليوم";
-    document.getElementById("memberSince").innerHTML = memberDate;
-    
-    loadUserOrders();
+    // حساب إحصائيات العميل من الطلبات
+    loadCustomerOrders();
   }
 
-  // تحميل طلبات المستخدم
-  function loadUserOrders() {
+  // تحميل طلبات العميل
+  function loadCustomerOrders() {
     const allOrders = JSON.parse(localStorage.getItem("storeOrders") || "[]");
-    const userOrders = allOrders.filter(o => o.phone === currentUser.phone);
+    const customerOrders = allOrders.filter(o => o.phone === currentCustomer.phone);
     
-    const totalOrders = userOrders.length;
-    const totalSpent = userOrders.reduce((sum, o) => sum + o.total, 0);
+    const totalOrders = customerOrders.length;
+    const totalSpent = customerOrders.reduce((sum, o) => sum + o.total, 0);
     
     document.getElementById("totalOrdersCount").innerHTML = totalOrders;
     document.getElementById("totalSpent").innerHTML = totalSpent.toLocaleString() + "$";
     
-    // تحديث totalSpent في Firebase
-    database.ref('users/' + currentUser.id).update({ totalSpent: totalSpent });
+    // أول طلب
+    if (customerOrders.length > 0) {
+      const oldestOrder = customerOrders.reduce((oldest, o) => {
+        return new Date(o.date) < new Date(oldest.date) ? o : oldest;
+      });
+      const firstOrderDate = new Date(oldestOrder.date).toLocaleDateString('ar');
+      document.getElementById("memberSince").innerHTML = firstOrderDate;
+    } else {
+      document.getElementById("memberSince").innerHTML = "لا توجد طلبات";
+    }
     
-    displayOrders(userOrders);
+    // تحديث totalSpent في Firebase
+    database.ref('customers/' + currentCustomer.id).update({ totalSpent: totalSpent });
+    
+    displayOrders(customerOrders);
   }
 
   function displayOrders(orders) {
@@ -674,7 +648,7 @@
     const modal = document.getElementById("orderModal");
     const detailsDiv = document.getElementById("modalDetails");
     
-    let itemsHtml = "<div style='margin-top:15px'><strong>المنتجات:</strong><ul>";
+    let itemsHtml = "<div style='margin-top:15px'><strong>المنتجات:</strong><ul style='margin-top:10px'>";
     order.items?.forEach(item => {
       itemsHtml += `<li>${item.name} - ${item.price}$ × ${item.quantity} = ${item.price * item.quantity}$</li>`;
     });
@@ -698,42 +672,29 @@
   // تحديث المعلومات الشخصية
   function updateProfile() {
     const newName = document.getElementById("editName").value.trim();
-    const newPhone = document.getElementById("editPhone").value.trim();
     const newAddress = document.getElementById("editAddress").value.trim();
-    const newPassword = document.getElementById("editPassword").value;
 
-    if (!newName || !newPhone) { showToast("⚠️ الاسم والجوال مطلوبان", "#f97316"); return; }
+    if (!newName) {
+      showToast("⚠️ الرجاء إدخال الاسم", "#f97316");
+      return;
+    }
 
-    const updates = { name: newName, phone: newPhone, address: newAddress };
-    if (newPassword) updates.password = newPassword;
-
-    database.ref('users/' + currentUser.id).update(updates).then(() => {
-      currentUser = { ...currentUser, ...updates };
-      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    const updates = { name: newName, address: newAddress };
+    
+    database.ref('customers/' + currentCustomer.id).update(updates).then(() => {
+      currentCustomer = { ...currentCustomer, ...updates };
       showProfile();
-      showToast("✅ تم تحديث المعلومات", "#10b981");
+      showToast("✅ تم تحديث المعلومات بنجاح", "#10b981");
     });
   }
 
-  function toggleAuth() {
-    const loginForm = document.getElementById("loginForm");
-    const registerForm = document.getElementById("registerForm");
-    const authTitle = document.getElementById("authTitle");
-    const switchText = document.querySelector(".switch-auth span");
-    
-    if (loginForm.style.display !== "none") {
-      loginForm.style.display = "none";
-      registerForm.style.display = "block";
-      authTitle.innerText = "إنشاء حساب جديد";
-      switchText.innerText = "تسجيل الدخول";
-      switchText.setAttribute("onclick", "toggleAuth()");
-    } else {
-      loginForm.style.display = "block";
-      registerForm.style.display = "none";
-      authTitle.innerText = "تسجيل الدخول";
-      switchText.innerText = "إنشاء حساب جديد";
-      switchText.setAttribute("onclick", "toggleAuth()");
-    }
+  // تغيير رقم الجوال (العودة للبحث)
+  function changePhone() {
+    document.getElementById("searchSection").style.display = "flex";
+    document.getElementById("profileSection").style.display = "none";
+    document.getElementById("searchPhone").value = "";
+    currentCustomer = null;
+    currentPhone = null;
   }
 
   function switchTab(tab) {
@@ -757,9 +718,9 @@
     setTimeout(() => toast.remove(), 3000);
   }
 
-  window.onclick = (e) => { if (e.target === document.getElementById("orderModal")) closeModal(); };
-  
-  loadCurrentUser();
+  window.onclick = (e) => { 
+    if (e.target === document.getElementById("orderModal")) closeModal(); 
+  };
 </script>
 </body>
-  </html>
+          </html>
