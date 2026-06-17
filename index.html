@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>عيادة بروفيشنال | نظام حجز متقدم</title>
+<title>عيادة بروفيشنال | نظام حجز متقدم - Firebase</title>
 <!-- Google Fonts + Font Awesome -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
 * {
     margin: 0;
@@ -21,7 +24,38 @@ body {
     color: #1a2c3e;
 }
 
-/* sophisticated glassmorphism + modern neutrals */
+/* loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    color: white;
+    font-size: 18px;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255,255,255,0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 .container {
     max-width: 1440px;
     margin: 0 auto;
@@ -212,10 +246,15 @@ body {
     box-shadow: 0 8px 18px -6px rgba(42,82,152,0.35);
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 14px 24px -10px rgba(42,82,152,0.5);
     background: linear-gradient(105deg, #14315c, #1f4590);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .btn-outline {
@@ -452,49 +491,13 @@ body {
     opacity: 0.7;
 }
 
-/* modal */
-.modal-modern {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(6px);
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-
-.modal-modern.active {
-    display: flex;
-}
-
-.modal-card {
-    background: white;
-    border-radius: 48px;
-    max-width: 440px;
-    width: 90%;
-    padding: 32px;
-    text-align: center;
-    box-shadow: 0 40px 60px rgba(0,0,0,0.3);
-}
-
-.modal-card i {
-    font-size: 52px;
-    color: #cd5c5c;
-    margin-bottom: 16px;
-}
-
 .toast-notify {
     position: fixed;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: #1f2f3e;
-    backdrop-filter: blur(12px);
     background: rgba(20, 40, 55, 0.95);
+    backdrop-filter: blur(12px);
     color: white;
     padding: 12px 28px;
     border-radius: 60px;
@@ -507,18 +510,45 @@ body {
     gap: 12px;
 }
 
+.connection-status {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.7);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    color: white;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 @media (max-width: 700px) {
     body { padding: 20px 16px; }
     .header-premium h1 { font-size: 22px; }
     .stat-modern { padding: 14px; }
+    .connection-status { top: 10px; left: 10px; font-size: 10px; }
 }
 </style>
 </head>
 <body>
-<div class="container">
-    <!-- header professional -->
+<div id="loadingOverlay" class="loading-overlay" style="display: flex;">
+    <div class="loading-spinner"></div>
+    <div>جاري الاتصال بقاعدة البيانات السحابية...</div>
+</div>
+
+<div class="container" style="display: none;">
+    <!-- connection status -->
+    <div class="connection-status" id="connStatus">
+        <i class="fas fa-circle" style="color: #ffaa00; font-size: 10px;"></i>
+        <span>جاري الاتصال...</span>
+    </div>
+
+    <!-- header premium -->
     <div class="header-premium">
-        <h1><i class="fas fa-hospital-user"></i> نظام حجز العيادات الطبية المتقدم <i class="fas fa-calendar-check"></i></h1>
+        <h1><i class="fas fa-cloud-upload-alt"></i> نظام حجز العيادات - سحابي <i class="fas fa-calendar-check"></i></h1>
         <div class="stats-4grid">
             <div class="stat-modern"><div class="stat-icon"><i class="fas fa-calendar-alt"></i></div><div class="stat-info"><h3 id="totalCount">0</h3><p>إجمالي الحجوزات</p></div></div>
             <div class="stat-modern"><div class="stat-icon"><i class="fas fa-sun"></i></div><div class="stat-info"><h3 id="todayCount">0</h3><p>حجوزات اليوم</p></div></div>
@@ -563,13 +593,30 @@ body {
 </div>
 
 <script>
-// ---------- Data ----------
-let appointments = JSON.parse(localStorage.getItem("advanced_clinic_appointments")) || [];
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyB0p0us6BuzD2ngzjhRnmUIhlOcBeRp0vQ",
+    authDomain: "tok-tak-d6e17.firebaseapp.com",
+    databaseURL: "https://tok-tak-d6e17-default-rtdb.firebaseio.com",
+    projectId: "tok-tak-d6e17",
+    storageBucket: "tok-tak-d6e17.appspot.com",
+    messagingSenderId: "547062578826",
+    appId: "1:547062578826:web:aa285cf798341be07cb773",
+    measurementId: "G-7EMKEQKPVV"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const appointmentsRef = database.ref('appointments');
+
+let appointments = [];
 let editModeId = null;
 let currentFilter = "all";
 let searchQuery = "";
+let isLoading = true;
 
-// DOM
+// DOM Elements
 const patientNameInp = document.getElementById("patientName");
 const doctorNameInp = document.getElementById("doctorName");
 const specialtySelect = document.getElementById("specialty");
@@ -582,11 +629,81 @@ const deleteAllBtn = document.getElementById("deleteAllBtn");
 const formTitleSpan = document.getElementById("formTitle");
 const appointmentsGrid = document.getElementById("appointmentsGrid");
 const globalSearch = document.getElementById("globalSearch");
+const loadingOverlay = document.getElementById("loadingOverlay");
+const mainContainer = document.querySelector(".container");
+const connStatusSpan = document.getElementById("connStatus");
 
-// helpers
 const getTodayStr = () => new Date().toISOString().split("T")[0];
 const todayStr = getTodayStr();
 dateInp.min = todayStr;
+
+// Helper Functions
+function showToast(msg, isError = false) {
+    const existing = document.querySelector(".toast-notify");
+    if(existing) existing.remove();
+    const toast = document.createElement("div");
+    toast.className = "toast-notify";
+    toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${msg}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2700);
+}
+
+function updateConnectionStatus(connected) {
+    if(connected) {
+        connStatusSpan.innerHTML = '<i class="fas fa-circle" style="color: #4caf50; font-size: 10px;"></i><span>متصل بالسحابة</span>';
+    } else {
+        connStatusSpan.innerHTML = '<i class="fas fa-circle" style="color: #f44336; font-size: 10px;"></i><span>غير متصل - وضع غير متصل</span>';
+    }
+}
+
+// Listen for connection status
+database.ref('.info/connected').on('value', (snap) => {
+    updateConnectionStatus(snap.val());
+    if(snap.val()) {
+        showToast("✅ متصل بقاعدة البيانات السحابية", false);
+    } else {
+        showToast("⚠️ فقدان الاتصال بالإنترنت", true);
+    }
+});
+
+// Real-time listener for appointments
+appointmentsRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if(data) {
+        appointments = Object.entries(data).map(([id, value]) => ({
+            firebaseId: id,
+            id: value.originalId || parseInt(id),
+            patient: value.patient,
+            doctor: value.doctor,
+            spec: value.spec,
+            date: value.date,
+            time: value.time,
+            phone: value.phone,
+            createdAt: value.createdAt
+        }));
+    } else {
+        appointments = [];
+    }
+    
+    if(isLoading) {
+        isLoading = false;
+        loadingOverlay.style.display = "none";
+        mainContainer.style.display = "block";
+        showToast("تم تحميل البيانات من السحابة بنجاح", false);
+    }
+    
+    updateAllStats();
+    renderAppointments();
+    remindTodayAppointments();
+}, (error) => {
+    console.error("Firebase error:", error);
+    if(isLoading) {
+        isLoading = false;
+        loadingOverlay.style.display = "none";
+        mainContainer.style.display = "block";
+        showToast("⚠️ مشكلة في الاتصال - بيانات محلية فقط", true);
+    }
+});
 
 function updateAllStats() {
     const total = appointments.length;
@@ -598,41 +715,6 @@ function updateAllStats() {
     document.getElementById("todayCount").innerText = todayCount;
     document.getElementById("weekCount").innerText = weekCount;
     document.getElementById("doctorsCount").innerText = uniqueDoctors;
-}
-
-function saveToLocal() {
-    localStorage.setItem("advanced_clinic_appointments", JSON.stringify(appointments));
-    updateAllStats();
-    renderAppointments();
-}
-
-function showToast(msg, isError = false) {
-    const existing = document.querySelector(".toast-notify");
-    if(existing) existing.remove();
-    const toast = document.createElement("div");
-    toast.className = "toast-notify";
-    toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${msg}`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2700);
-}
-
-function confirmDialog(message, onConfirm) {
-    const modalDiv = document.createElement("div");
-    modalDiv.className = "modal-modern active";
-    modalDiv.innerHTML = `
-        <div class="modal-card">
-            <i class="fas fa-question-circle"></i>
-            <h4 style="margin-bottom: 20px; font-size: 20px;">${message}</h4>
-            <div style="display: flex; gap: 14px; justify-content: center;">
-                <button class="btn btn-outline" id="modalCancel">إلغاء</button>
-                <button class="btn btn-primary" id="modalConfirm">تأكيد</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modalDiv);
-    const closeModal = () => modalDiv.remove();
-    modalDiv.querySelector("#modalCancel").onclick = closeModal;
-    modalDiv.querySelector("#modalConfirm").onclick = () => { closeModal(); onConfirm(); };
 }
 
 function clearForm() {
@@ -651,85 +733,9 @@ function resetEditMode() {
     clearForm();
 }
 
-function editAppointment(id) {
-    const app = appointments.find(a => a.id === id);
-    if(!app) return;
-    patientNameInp.value = app.patient;
-    doctorNameInp.value = app.doctor;
-    specialtySelect.value = app.spec;
-    dateInp.value = app.date;
-    timeInp.value = app.time;
-    phoneInp.value = app.phone;
-    editModeId = id;
-    formTitleSpan.innerHTML = "تعديل الحجز";
-    cancelEditBtn.style.display = "inline-flex";
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function cancelEdit() {
-    resetEditMode();
-}
-
-function deleteAppointment(id) {
-    confirmDialog("هل أنت متأكد من حذف هذا الحجز؟", () => {
-        appointments = appointments.filter(a => a.id !== id);
-        saveToLocal();
-        showToast("تم حذف الموعد بنجاح");
-        if(editModeId === id) resetEditMode();
-    });
-}
-
-function deleteAllAppointments() {
-    if(appointments.length === 0) { showToast("لا توجد حجوزات للحذف", true); return; }
-    confirmDialog("⚠️ حذف جميع الحجوزات بشكل نهائي؟", () => {
-        appointments = [];
-        saveToLocal();
-        resetEditMode();
-        showToast("تم حذف جميع الحجوزات");
-    });
-}
-
-function saveAppointment() {
-    const patient = patientNameInp.value.trim();
-    const doctor = doctorNameInp.value.trim();
-    const spec = specialtySelect.value;
-    const date = dateInp.value;
-    const time = timeInp.value;
-    const phone = phoneInp.value.trim() || "غير مدخل";
-
-    if (!patient || !doctor || !spec || !date || !time) {
-        showToast("يرجى ملء جميع الحقول المطلوبة", true);
-        return;
-    }
-
-    // check conflict for same doctor same datetime
-    const conflict = appointments.find(a => a.doctor.toLowerCase() === doctor.toLowerCase() && a.date === date && a.time === time && a.id !== editModeId);
-    if(conflict) {
-        showToast(`❌ الدكتور ${doctor} لديه موعد في نفس الوقت`, true);
-        return;
-    }
-
-    if(editModeId) {
-        appointments = appointments.map(a => a.id === editModeId ? {...a, patient, doctor, spec, date, time, phone} : a);
-        showToast("تم تعديل الموعد بنجاح");
-        resetEditMode();
-    } else {
-        const newApp = {
-            id: Date.now(),
-            patient, doctor, spec, date, time, phone,
-            createdAt: new Date().toISOString()
-        };
-        appointments.push(newApp);
-        showToast("تم إضافة الحجز بنجاح");
-        clearForm();
-    }
-    saveToLocal();
-}
-
 function getFilteredAppointments() {
     let filtered = [...appointments];
-    const todayDate = todayStr;
-    if(currentFilter === "today") filtered = filtered.filter(a => a.date === todayDate);
+    if(currentFilter === "today") filtered = filtered.filter(a => a.date === todayStr);
     else if(currentFilter === "week") {
         const weekAgoDate = new Date(); weekAgoDate.setDate(weekAgoDate.getDate() - 7);
         const weekStart = weekAgoDate.toISOString().split("T")[0];
@@ -757,6 +763,16 @@ function formatDisplayDate(dateStr) {
     if(dateStr === todayStr) return "اليوم";
     const d = new Date(dateStr);
     return d.toLocaleDateString("ar-EG", { year:'numeric', month:'short', day:'numeric' });
+}
+
+function escapeHtml(str) { 
+    if(!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if(m === '&') return '&amp;';
+        if(m === '<') return '&lt;';
+        if(m === '>') return '&gt;';
+        return m;
+    });
 }
 
 function renderAppointments() {
@@ -794,22 +810,154 @@ function renderAppointments() {
                     <div class="detail-row"><div class="detail-icon"><i class="fas fa-phone-alt"></i></div><div class="detail-text"><div class="detail-label">الهاتف</div><div class="detail-value">${escapeHtml(app.phone)}</div></div></div>
                 </div>
                 <div class="card-actions-flex">
-                    <button class="btn-sm" onclick="editAppointment(${app.id})"><i class="fas fa-edit"></i> تعديل</button>
-                    <button class="btn-sm btn-sm-danger" onclick="deleteAppointment(${app.id})"><i class="fas fa-trash"></i> حذف</button>
+                    <button class="btn-sm" onclick="editAppointment('${app.firebaseId}')"><i class="fas fa-edit"></i> تعديل</button>
+                    <button class="btn-sm btn-sm-danger" onclick="deleteAppointment('${app.firebaseId}')"><i class="fas fa-trash"></i> حذف</button>
                 </div>
             </div>
         </div>`;
     }).join('');
 }
 
-function escapeHtml(str) { 
-    if(!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if(m === '&') return '&amp;';
-        if(m === '<') return '&lt;';
-        if(m === '>') return '&gt;';
-        return m;
+// Firebase CRUD Operations
+async function saveAppointment() {
+    const patient = patientNameInp.value.trim();
+    const doctor = doctorNameInp.value.trim();
+    const spec = specialtySelect.value;
+    const date = dateInp.value;
+    const time = timeInp.value;
+    const phone = phoneInp.value.trim() || "غير مدخل";
+
+    if (!patient || !doctor || !spec || !date || !time) {
+        showToast("يرجى ملء جميع الحقول المطلوبة", true);
+        return;
+    }
+
+    // Check for conflicts
+    const conflict = appointments.find(a => 
+        a.doctor.toLowerCase() === doctor.toLowerCase() && 
+        a.date === date && 
+        a.time === time && 
+        (!editModeId || a.firebaseId !== editModeId)
+    );
+
+    if(conflict) {
+        showToast(`❌ الدكتور ${doctor} لديه موعد في نفس الوقت`, true);
+        return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري الحفظ...';
+
+    try {
+        if(editModeId) {
+            // Update existing appointment
+            await appointmentsRef.child(editModeId).update({
+                patient, doctor, spec, date, time, phone
+            });
+            showToast("✅ تم تعديل الموعد بنجاح");
+            resetEditMode();
+        } else {
+            // Create new appointment
+            const newId = Date.now();
+            await appointmentsRef.push({
+                originalId: newId,
+                patient, doctor, spec, date, time, phone,
+                createdAt: new Date().toISOString()
+            });
+            showToast("✅ تم إضافة الحجز بنجاح");
+            clearForm();
+        }
+    } catch (error) {
+        console.error("Save error:", error);
+        showToast("❌ فشل الحفظ - تأكد من الاتصال بالإنترنت", true);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> حفظ الحجز';
+    }
+}
+
+async function deleteAppointment(firebaseId) {
+    if(!firebaseId) return;
+    
+    const confirmed = await new Promise(resolve => {
+        const modalDiv = document.createElement("div");
+        modalDiv.className = "modal-modern active";
+        modalDiv.innerHTML = `
+            <div class="modal-card">
+                <i class="fas fa-question-circle"></i>
+                <h4 style="margin-bottom: 20px; font-size: 20px;">هل أنت متأكد من حذف هذا الحجز؟</h4>
+                <div style="display: flex; gap: 14px; justify-content: center;">
+                    <button class="btn btn-outline" id="modalCancel">إلغاء</button>
+                    <button class="btn btn-primary" id="modalConfirm">تأكيد</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        modalDiv.querySelector("#modalCancel").onclick = () => { modalDiv.remove(); resolve(false); };
+        modalDiv.querySelector("#modalConfirm").onclick = () => { modalDiv.remove(); resolve(true); };
     });
+    
+    if(!confirmed) return;
+    
+    try {
+        await appointmentsRef.child(firebaseId).remove();
+        showToast("✅ تم حذف الموعد بنجاح");
+        if(editModeId === firebaseId) resetEditMode();
+    } catch (error) {
+        showToast("❌ فشل الحذف", true);
+    }
+}
+
+async function deleteAllAppointments() {
+    if(appointments.length === 0) { showToast("لا توجد حجوزات للحذف", true); return; }
+    
+    const confirmed = await new Promise(resolve => {
+        const modalDiv = document.createElement("div");
+        modalDiv.className = "modal-modern active";
+        modalDiv.innerHTML = `
+            <div class="modal-card">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4 style="margin-bottom: 20px; font-size: 20px;">⚠️ هل أنت متأكد من حذف جميع الحجوزات؟ هذا الإجراء لا يمكن التراجع عنه</h4>
+                <div style="display: flex; gap: 14px; justify-content: center;">
+                    <button class="btn btn-outline" id="modalCancel">إلغاء</button>
+                    <button class="btn btn-primary" id="modalConfirm">تأكيد</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        modalDiv.querySelector("#modalCancel").onclick = () => { modalDiv.remove(); resolve(false); };
+        modalDiv.querySelector("#modalConfirm").onclick = () => { modalDiv.remove(); resolve(true); };
+    });
+    
+    if(!confirmed) return;
+    
+    try {
+        await appointmentsRef.remove();
+        showToast("✅ تم حذف جميع الحجوزات");
+        resetEditMode();
+    } catch (error) {
+        showToast("❌ فشل حذف الكل", true);
+    }
+}
+
+function editAppointment(firebaseId) {
+    const app = appointments.find(a => a.firebaseId === firebaseId);
+    if(!app) return;
+    
+    patientNameInp.value = app.patient;
+    doctorNameInp.value = app.doctor;
+    specialtySelect.value = app.spec;
+    dateInp.value = app.date;
+    timeInp.value = app.time;
+    phoneInp.value = app.phone;
+    editModeId = firebaseId;
+    formTitleSpan.innerHTML = "تعديل الحجز";
+    cancelEditBtn.style.display = "inline-flex";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function cancelEdit() {
+    resetEditMode();
 }
 
 function setActiveFilter(filter) {
@@ -823,14 +971,14 @@ function setActiveFilter(filter) {
 
 function remindTodayAppointments() {
     const todayApps = appointments.filter(a => a.date === todayStr);
-    if(todayApps.length > 0) {
+    if(todayApps.length > 0 && !isLoading) {
         setTimeout(() => {
             showToast(`🔔 لديك ${todayApps.length} موعد${todayApps.length > 1 ? 'ات' : ''} اليوم`, false);
-        }, 400);
+        }, 800);
     }
 }
 
-// event listeners
+// Event Listeners
 saveBtn.onclick = saveAppointment;
 cancelEditBtn.onclick = cancelEdit;
 deleteAllBtn.onclick = deleteAllAppointments;
@@ -842,15 +990,9 @@ document.querySelectorAll(".chip").forEach(chip => {
     });
 });
 
-// initial render
-resetEditMode();
-renderAppointments();
-updateAllStats();
-remindTodayAppointments();
-
-// ensure global functions accessible for inline buttons
+// Make functions global for inline onclick
 window.editAppointment = editAppointment;
 window.deleteAppointment = deleteAppointment;
 </script>
 </body>
-                                                                                                                           </html>
+    </html>
