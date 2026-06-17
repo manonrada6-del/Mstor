@@ -972,4 +972,265 @@ function getFilteredAppointments() {
     const statusOrder = { 'في الانتظار': 0, 'قيد الكشف': 1, 'تم الكشف': 2 };
     filtered.sort((a,b) => {
         const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3);
-        if(statusDiff !==
+        if(statusDiff !== 0) return statusDiff;
+        return (a.date + a.time).localeCompare(b.date + b.time);
+    });
+    return filtered;
+}
+
+function formatDisplayDate(dateStr) {
+    if(dateStr === todayStr) return "اليوم";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("ar-EG", { year:'numeric', month:'short', day:'numeric' });
+}
+
+function escapeHtml(str) { 
+    if(!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if(m === '&') return '&amp;';
+        if(m === '<') return '&lt;';
+        if(m === '>') return '&gt;';
+        return m;
+    });
+}
+
+function getStatusBadge(status) {
+    const statusMap = {
+        'في الانتظار': { class: 'badge-waiting', icon: 'fa-clock', text: 'في الانتظار' },
+        'قيد الكشف': { class: 'badge-in-progress', icon: 'fa-spinner', text: 'قيد الكشف' },
+        'تم الكشف': { class: 'badge-completed', icon: 'fa-check-circle', text: 'تم الكشف' }
+    };
+    return statusMap[status] || statusMap['في الانتظار'];
+}
+
+function getAccentClass(status) {
+    const map = {
+        'في الانتظار': 'waiting',
+        'قيد الكشف': 'in-progress',
+        'تم الكشف': 'completed'
+    };
+    return map[status] || '';
+}
+
+function renderAppointments() {
+    const list = getFilteredAppointments();
+    if(list.length === 0) {
+        appointmentsGrid.innerHTML = `
+            <div class="empty-state-premium">
+                <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
+                <h3>لا توجد مواعيد</h3>
+                <p>ابدأ بإضافة حجز جديد عبر النموذج أعلاه</p>
+            </div>
+        `;
+        return;
+    }
+    
+    appointmentsGrid.innerHTML = list.map(app => {
+        const isToday = app.date === todayStr;
+        const isPast = app.date < todayStr;
+        const statusInfo = getStatusBadge(app.status);
+        const accentClass = getAccentClass(app.status);
+        
+        let dateBadge = '';
+        if(isToday) dateBadge = '📅 اليوم';
+        else if(isPast) dateBadge = '⏮️ منتهي';
+        else dateBadge = `📆 ${formatDisplayDate(app.date)}`;
+        
+        return `
+        <div class="appt-card">
+            <div class="card-accent ${accentClass}"></div>
+            <div class="card-body">
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                    <span class="badge-status ${statusInfo.class}"><i class="fas ${statusInfo.icon}"></i> ${statusInfo.text}</span>
+                    <span class="badge-status badge-today">${dateBadge}</span>
+                    <span class="badge-status badge-service"><i class="fas fa-stethoscope"></i> ${escapeHtml(app.serviceType)}</span>
+                </div>
+                <div class="appt-detail-grid">
+                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-user-injured"></i></div><div class="detail-text"><div class="detail-label">المريض</div><div class="detail-value">${escapeHtml(app.patient)}</div></div></div>
+                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-user-md"></i></div><div class="detail-text"><div class="detail-label">الدكتور</div><div class="detail-value">${escapeHtml(app.doctor)}</div></div></div>
+                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-microscope"></i></div><div class="detail-text"><div class="detail-label">التخصص</div><div class="detail-value">${escapeHtml(app.spec)}</div></div></div>
+                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-calendar-alt"></i></div><div class="detail-text"><div class="detail-label">التاريخ والوقت</div><div class="detail-value">${escapeHtml(app.date)} - ${escapeHtml(app.time)}</div></div></div>
+                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-phone-alt"></i></div><div class="detail-text"><div class="detail-label">الهاتف</div><div class="detail-value">${escapeHtml(app.phone)}</div></div></div>
+                    ${app.notes ? `<div class="detail-row"><div class="detail-icon"><i class="fas fa-comment"></i></div><div class="detail-text"><div class="detail-label">ملاحظات</div><div class="detail-value" style="font-weight: 400; font-size: 14px;">${escapeHtml(app.notes)}</div></div></div>` : ''}
+                </div>
+                <div class="card-actions-flex">
+                    ${app.status === 'في الانتظار' ? `<button class="btn-sm btn-sm-success" onclick="updateStatus('${app.firebaseId}', 'قيد الكشف')"><i class="fas fa-play"></i> بدء الكشف</button>` : ''}
+                    ${app.status === 'قيد الكشف' ? `<button class="btn-sm btn-sm-info" onclick="updateStatus('${app.firebaseId}', 'تم الكشف')"><i class="fas fa-check"></i> إنهاء الكشف</button>` : ''}
+                    ${app.status === 'تم الكشف' ? `<button class="btn-sm btn-sm-warning" onclick="updateStatus('${app.firebaseId}', 'في الانتظار')"><i class="fas fa-undo"></i> إعادة</button>` : ''}
+                    <button class="btn-sm" onclick="editAppointment('${app.firebaseId}')"><i class="fas fa-edit"></i> تعديل</button>
+                    <button class="btn-sm btn-sm-danger" onclick="deleteAppointment('${app.firebaseId}')"><i class="fas fa-trash"></i> حذف</button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// Firebase CRUD Operations
+async function saveAppointment() {
+    const patient = patientNameInp.value.trim();
+    const doctor = doctorNameInp.value.trim();
+    const spec = specialtySelect.value;
+    const date = dateInp.value;
+    const time = timeInp.value;
+    const phone = phoneInp.value.trim() || "غير مدخل";
+    const serviceType = serviceTypeSelect.value;
+    const status = statusSelect.value;
+    const notes = notesInp.value.trim();
+
+    if (!patient || !doctor || !spec || !date || !time || !phone) {
+        showToast("يرجى ملء جميع الحقول المطلوبة", true);
+        return;
+    }
+
+    // Check for conflicts
+    const conflict = appointments.find(a => 
+        a.doctor.toLowerCase() === doctor.toLowerCase() && 
+        a.date === date && 
+        a.time === time && 
+        (!editModeId || a.firebaseId !== editModeId)
+    );
+
+    if(conflict) {
+        showToast(`❌ الدكتور ${doctor} لديه موعد في نفس الوقت`, true);
+        return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري الحفظ...';
+
+    try {
+        if(editModeId) {
+            await appointmentsRef.child(editModeId).update({
+                patient, doctor, spec, date, time, phone, serviceType, status, notes
+            });
+            showToast("✅ تم تعديل الحجز بنجاح");
+            resetEditMode();
+        } else {
+            const newId = Date.now();
+            await appointmentsRef.push({
+                originalId: newId,
+                patient, doctor, spec, date, time, phone, serviceType, status, notes,
+                createdAt: new Date().toISOString()
+            });
+            showToast("✅ تم إرسال طلب الحجز بنجاح");
+            clearForm();
+        }
+    } catch (error) {
+        console.error("Save error:", error);
+        showToast("❌ فشل الحفظ - تأكد من الاتصال بالإنترنت", true);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> إرسال طلب الحجز';
+    }
+}
+
+async function deleteAppointment(firebaseId) {
+    if(!firebaseId) return;
+    
+    const confirmed = await showConfirm('fa-trash-alt', 'حذف الحجز', 'هل أنت متأكد من حذف هذا الحجز؟');
+    if(!confirmed) return;
+    
+    try {
+        await appointmentsRef.child(firebaseId).remove();
+        showToast("✅ تم حذف الموعد بنجاح");
+        if(editModeId === firebaseId) resetEditMode();
+    } catch (error) {
+        showToast("❌ فشل الحذف", true);
+    }
+}
+
+async function updateStatus(firebaseId, newStatus) {
+    if(!firebaseId) return;
+    
+    const statusMap = {
+        'في الانتظار': 'بدء الكشف',
+        'قيد الكشف': 'إنهاء الكشف',
+        'تم الكشف': 'إعادة الحجز'
+    };
+    
+    const confirmed = await showConfirm('fa-exchange-alt', 'تحديث الحالة', `هل أنت متأكد من ${statusMap[newStatus] || 'تحديث الحالة'}؟`);
+    if(!confirmed) return;
+    
+    try {
+        await appointmentsRef.child(firebaseId).update({ status: newStatus });
+        showToast(`✅ تم تحديث الحالة إلى "${newStatus}"`);
+    } catch (error) {
+        showToast("❌ فشل تحديث الحالة", true);
+    }
+}
+
+async function deleteAllAppointments() {
+    if(appointments.length === 0) { showToast("لا توجد حجوزات للحذف", true); return; }
+    
+    const confirmed = await showConfirm('fa-exclamation-triangle', 'حذف الكل', '⚠️ هل أنت متأكد من حذف جميع الحجوزات؟ هذا الإجراء لا يمكن التراجع عنه');
+    if(!confirmed) return;
+    
+    try {
+        await appointmentsRef.remove();
+        showToast("✅ تم حذف جميع الحجوزات");
+        resetEditMode();
+    } catch (error) {
+        showToast("❌ فشل حذف الكل", true);
+    }
+}
+
+function editAppointment(firebaseId) {
+    const app = appointments.find(a => a.firebaseId === firebaseId);
+    if(!app) return;
+    
+    patientNameInp.value = app.patient;
+    doctorNameInp.value = app.doctor;
+    specialtySelect.value = app.spec;
+    dateInp.value = app.date;
+    timeInp.value = app.time;
+    phoneInp.value = app.phone;
+    serviceTypeSelect.value = app.serviceType || 'كشف عادي';
+    statusSelect.value = app.status || 'في الانتظار';
+    notesInp.value = app.notes || '';
+    editModeId = firebaseId;
+    formTitleSpan.innerHTML = "تعديل الحجز";
+    cancelEditBtn.style.display = "inline-flex";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function cancelEdit() {
+    resetEditMode();
+}
+
+function setActiveFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll(".chip").forEach(chip => {
+        if(chip.getAttribute("data-filter") === filter) chip.classList.add("active");
+        else chip.classList.remove("active");
+    });
+    renderAppointments();
+}
+
+function remindTodayAppointments() {
+    const todayApps = appointments.filter(a => a.date === todayStr);
+    if(todayApps.length > 0 && !isLoading) {
+        setTimeout(() => {
+            showToast(`🔔 لديك ${todayApps.length} موعد${todayApps.length > 1 ? 'ات' : ''} اليوم`, false);
+        }, 800);
+    }
+}
+
+// Event Listeners
+saveBtn.onclick = saveAppointment;
+cancelEditBtn.onclick = cancelEdit;
+deleteAllBtn.onclick = deleteAllAppointments;
+globalSearch.addEventListener("input", (e) => { searchQuery = e.target.value; renderAppointments(); });
+document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", (e) => {
+        const filterVal = chip.getAttribute("data-filter");
+        setActiveFilter(filterVal);
+    });
+});
+
+// Make functions global for inline onclick
+window.editAppointment = editAppointment;
+window.deleteAppointment = deleteAppointment;
+window.updateStatus = updateStatus;
+</script>
+</body>
+    </html>
