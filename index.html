@@ -1,1236 +1,985 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>عيادة بروفيشنال | نظام حجز متقدم - Firebase</title>
-<!-- Google Fonts + Font Awesome -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background: #f0f4fc;
-    font-family: 'Inter', 'Tajawal', sans-serif;
-    padding: 32px 24px;
-    color: #1a2c3e;
-}
-
-/* loading overlay */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 20px;
-    color: white;
-    font-size: 18px;
-}
-
-.loading-spinner {
-    width: 60px;
-    height: 60px;
-    border: 5px solid rgba(255,255,255,0.2);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.container {
-    max-width: 1440px;
-    margin: 0 auto;
-}
-
-/* header premium */
-.header-premium {
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(2px);
-    border-radius: 40px;
-    padding: 28px 32px;
-    margin-bottom: 32px;
-    box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08), 0 1px 1px rgba(0,0,0,0.02);
-    border: 1px solid rgba(166, 194, 220, 0.4);
-}
-
-.header-premium h1 {
-    font-size: 28px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #1E3C72, #2A5298);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: center;
-    margin-bottom: 24px;
-    letter-spacing: -0.3px;
-}
-
-.header-premium h1 i {
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-    color: #2A5298;
-    font-size: 32px;
-}
-
-.stats-5grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-}
-
-.stat-modern {
-    background: white;
-    border-radius: 28px;
-    padding: 18px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    border: 1px solid #eef2f9;
-}
-
-.stat-modern:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 28px -12px rgba(42,82,152,0.18);
-    border-color: #cddef5;
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(145deg, #EFF3FE, #E9F0FF);
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: #2A5298;
-}
-
-.stat-icon.waiting-icon { background: linear-gradient(145deg, #FFF3E0, #FFE0B2); color: #E65100; }
-.stat-icon.progress-icon { background: linear-gradient(145deg, #E8F5E9, #C8E6C9); color: #2E7D32; }
-.stat-icon.completed-icon { background: linear-gradient(145deg, #E3F2FD, #BBDEFB); color: #1565C0; }
-
-.stat-info h3 {
-    font-size: 24px;
-    font-weight: 800;
-    color: #0B2B42;
-    line-height: 1.2;
-}
-
-.stat-info p {
-    font-size: 12px;
-    color: #5e7a93;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-}
-
-/* card form premium */
-.card-glass {
-    background: rgba(255,255,255,0.98);
-    border-radius: 36px;
-    padding: 28px 32px;
-    margin-bottom: 32px;
-    box-shadow: 0 18px 35px -12px rgba(0,0,0,0.06);
-    border: 1px solid rgba(255,255,255,0.8);
-    transition: box-shadow 0.2s;
-}
-
-.section-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 28px;
-    font-weight: 700;
-    font-size: 22px;
-    color: #1f3b62;
-    border-right: 5px solid #2A5298;
-    padding-right: 18px;
-}
-
-.section-title i {
-    font-size: 26px;
-    color: #2A5298;
-}
-
-.form-luxury {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px 24px;
-    margin-bottom: 24px;
-}
-
-.input-elevated {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.input-elevated label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #31567e;
-    letter-spacing: 0.3px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.input-elevated label i {
-    width: 20px;
-    color: #2A5298;
-    font-size: 14px;
-}
-
-.input-elevated input, .input-elevated select, .input-elevated textarea {
-    background: #F9FBFE;
-    border: 1.5px solid #E2EAF5;
-    border-radius: 20px;
-    padding: 12px 16px;
-    font-size: 15px;
-    font-family: inherit;
-    transition: all 0.2s;
-    outline: none;
-    color: #1f3b62;
-}
-
-.input-elevated input:focus, .input-elevated select:focus, .input-elevated textarea:focus {
-    border-color: #2A5298;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(42,82,152,0.12);
-}
-
-.btn-group {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.btn {
-    border: none;
-    padding: 12px 24px;
-    border-radius: 40px;
-    font-weight: 600;
-    font-size: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
-}
-
-.btn-primary {
-    background: linear-gradient(105deg, #1e3c72, #2a5298);
-    color: white;
-    box-shadow: 0 8px 18px -6px rgba(42,82,152,0.35);
-}
-
-.btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 24px -10px rgba(42,82,152,0.5);
-    background: linear-gradient(105deg, #14315c, #1f4590);
-}
-
-.btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1.5px solid #cfdfef;
-    color: #2c527c;
-}
-
-.btn-outline:hover {
-    background: #f2f7ff;
-    border-color: #2A5298;
-}
-
-.btn-danger-light {
-    background: #fff4f0;
-    color: #c23b22;
-    border: 1px solid #ffdad2;
-}
-
-.btn-danger-light:hover {
-    background: #ffe6df;
-    border-color: #e35f41;
-    transform: translateY(-1px);
-}
-
-.btn-success-light {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #a5d6a7;
-}
-
-.btn-success-light:hover {
-    background: #c8e6c9;
-    border-color: #66bb6a;
-    transform: translateY(-1px);
-}
-
-.btn-warning-light {
-    background: #fff3e0;
-    color: #e65100;
-    border: 1px solid #ffcc80;
-}
-
-.btn-warning-light:hover {
-    background: #ffe0b2;
-    border-color: #ffa726;
-    transform: translateY(-1px);
-}
-
-/* search & filters */
-.search-filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 10px;
-}
-
-.search-wrapper {
-    flex: 2;
-    min-width: 200px;
-    position: relative;
-}
-
-.search-wrapper i {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #8ba3c2;
-    font-size: 16px;
-}
-
-.search-wrapper input {
-    width: 100%;
-    padding: 12px 42px 12px 16px;
-    border-radius: 60px;
-    border: 1.5px solid #e2eaf5;
-    background: white;
-    font-size: 14px;
-    font-family: inherit;
-}
-
-.filter-chips {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.chip {
-    background: white;
-    border: 1px solid #dce5f0;
-    padding: 8px 18px;
-    border-radius: 40px;
-    font-weight: 500;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: #2c527c;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.chip i {
-    font-size: 12px;
-}
-
-.chip.active {
-    background: #1e3c72;
-    border-color: #1e3c72;
-    color: white;
-    box-shadow: 0 6px 12px -8px #1e3c72;
-}
-
-/* appointments grid premium */
-.grid-premium {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 24px;
-    margin-top: 20px;
-}
-
-.appt-card {
-    background: white;
-    border-radius: 32px;
-    transition: all 0.25s;
-    overflow: hidden;
-    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.06);
-    border: 1px solid #eef3fc;
-    position: relative;
-}
-
-.appt-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 25px 35px -16px rgba(0,0,0,0.12);
-    border-color: #cfe1fc;
-}
-
-.card-accent {
-    height: 6px;
-    background: linear-gradient(90deg, #2A5298, #6c8fc7);
-    width: 100%;
-}
-
-.card-accent.waiting {
-    background: linear-gradient(90deg, #f57c00, #ffa726);
-}
-
-.card-accent.in-progress {
-    background: linear-gradient(90deg, #2e7d32, #66bb6a);
-}
-
-.card-accent.completed {
-    background: linear-gradient(90deg, #1565c0, #42a5f5);
-}
-
-.card-body {
-    padding: 20px 22px 22px;
-}
-
-.badge-status {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 50px;
-    margin-bottom: 14px;
-}
-
-.badge-past {
-    background: #f1f3f7;
-    color: #6d7f8f;
-}
-
-.badge-today {
-    background: #eef3ff;
-    color: #1e5ba6;
-}
-
-.badge-waiting {
-    background: #fff3e0;
-    color: #e65100;
-}
-
-.badge-in-progress {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.badge-completed {
-    background: #e3f2fd;
-    color: #1565c0;
-}
-
-.badge-service {
-    background: #f3e5f5;
-    color: #6a1b9a;
-}
-
-.appt-detail-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 18px;
-}
-
-.detail-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.detail-icon {
-    width: 34px;
-    height: 34px;
-    background: #F4F9FF;
-    border-radius: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #2A5298;
-    font-size: 14px;
-    flex-shrink: 0;
-}
-
-.detail-text {
-    flex: 1;
-}
-
-.detail-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    color: #6a89aa;
-}
-
-.detail-value {
-    font-weight: 700;
-    font-size: 15px;
-    color: #142d44;
-}
-
-.card-actions-flex {
-    display: flex;
-    gap: 10px;
-    margin-top: 6px;
-    flex-wrap: wrap;
-}
-
-.btn-sm {
-    flex: 1;
-    min-width: 60px;
-    padding: 8px 12px;
-    border-radius: 28px;
-    font-weight: 600;
-    font-size: 12px;
-    border: none;
-    background: #F0F5FC;
-    color: #26527f;
-    cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.btn-sm-danger {
-    background: #fef2ef;
-    color: #bc3f27;
-}
-
-.btn-sm-success {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.btn-sm-warning {
-    background: #fff3e0;
-    color: #e65100;
-}
-
-.btn-sm-info {
-    background: #e3f2fd;
-    color: #1565c0;
-}
-
-.btn-sm:hover {
-    transform: scale(0.97);
-}
-
-/* empty state */
-.empty-state-premium {
-    background: white;
-    text-align: center;
-    padding: 60px 24px;
-    border-radius: 48px;
-    color: #728aa8;
-}
-
-.empty-icon {
-    font-size: 70px;
-    margin-bottom: 20px;
-    opacity: 0.7;
-}
-
-.toast-notify {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(20, 40, 55, 0.95);
-    backdrop-filter: blur(12px);
-    color: white;
-    padding: 12px 28px;
-    border-radius: 60px;
-    font-weight: 500;
-    z-index: 2100;
-    font-size: 14px;
-    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.connection-status {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background: rgba(0,0,0,0.7);
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-size: 12px;
-    color: white;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Modal styles */
-.modal-modern {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(6px);
-    z-index: 5000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.modal-modern.active {
-    display: flex;
-}
-
-.modal-card {
-    background: white;
-    padding: 36px 32px;
-    border-radius: 40px;
-    max-width: 480px;
-    width: 100%;
-    text-align: center;
-    box-shadow: 0 30px 50px -20px rgba(0,0,0,0.3);
-}
-
-.modal-card i {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: #2A5298;
-}
-
-.modal-card .btn-group {
-    justify-content: center;
-    margin-top: 16px;
-}
-
-@media (max-width: 700px) {
-    body { padding: 16px 12px; }
-    .header-premium { padding: 20px; }
-    .header-premium h1 { font-size: 20px; }
-    .stat-modern { padding: 12px 10px; gap: 10px; }
-    .stat-icon { width: 40px; height: 40px; font-size: 18px; }
-    .stat-info h3 { font-size: 20px; }
-    .connection-status { top: 10px; left: 10px; font-size: 10px; padding: 4px 10px; }
-    .grid-premium { grid-template-columns: 1fr; }
-    .modal-card { padding: 24px 16px; }
-    .form-luxury { grid-template-columns: 1fr; }
-    .stats-5grid { grid-template-columns: repeat(2, 1fr); }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>حجز امتحانات تالتة ثانوي | لوحة التحكم</title>
+    <!-- Font Awesome 6 (مجانية) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Font (Cairo) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(145deg, #f6f9fc 0%, #e9f2f9 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        /* الحاوية الرئيسية مع لوحة التحكم */
+        .app-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: row-reverse;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        /* ===== لوحة التحكم (الشريط الجانبي) ===== */
+        .dashboard-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 40px;
+            padding: 28px 20px;
+            min-width: 240px;
+            max-width: 280px;
+            flex: 1 1 240px;
+            box-shadow: 0 20px 40px rgba(0, 20, 40, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .dashboard-panel .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px dashed rgba(26, 95, 180, 0.15);
+            padding-bottom: 18px;
+        }
+
+        .dashboard-panel .panel-header i {
+            font-size: 2rem;
+            color: #1a5fb4;
+            background: rgba(26, 95, 180, 0.08);
+            padding: 12px;
+            border-radius: 20px;
+        }
+
+        .dashboard-panel .panel-header h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0a2942;
+        }
+
+        .dashboard-panel .panel-header h2 span {
+            color: #1a5fb4;
+        }
+
+        .panel-section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #406e96;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-section-title i {
+            font-size: 0.9rem;
+            color: #1a5fb4;
+        }
+
+        /* قائمة الإحصائيات */
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 14px 16px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: 0.2s;
+        }
+
+        .stat-item:hover {
+            transform: translateX(-4px);
+            border-color: rgba(26, 95, 180, 0.2);
+        }
+
+        .stat-item .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(26, 95, 180, 0.06);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a5fb4;
+            font-size: 1.4rem;
+        }
+
+        .stat-item .stat-info {
+            flex: 1;
+        }
+
+        .stat-item .stat-info .stat-label {
+            font-size: 0.8rem;
+            color: #5a7f9a;
+            font-weight: 600;
+        }
+
+        .stat-item .stat-info .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0a2942;
+            line-height: 1.2;
+        }
+
+        .stat-item .stat-info .stat-value small {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #5a7f9a;
+        }
+
+        /* قائمة الإجراءات السريعة */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quick-actions button {
+            background: white;
+            border: 1px solid rgba(26, 95, 180, 0.08);
+            padding: 14px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #1a2b3e;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+        }
+
+        .quick-actions button i {
+            color: #1a5fb4;
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .quick-actions button:hover {
+            background: #1a5fb4;
+            color: white;
+            border-color: #1a5fb4;
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(26, 95, 180, 0.15);
+        }
+
+        .quick-actions button:hover i {
+            color: white;
+        }
+
+        .quick-actions button.danger:hover {
+            background: #c0392b;
+            border-color: #c0392b;
+        }
+
+        /* ===== بطاقة الحجز الرئيسية (تظل كما هي) ===== */
+        .booking-card {
+            flex: 2 1 600px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 48px;
+            box-shadow: 0 30px 60px rgba(0, 20, 40, 0.20), 0 15px 30px rgba(0, 0, 0, 0.05);
+            padding: 30px 35px 45px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        @media (max-width: 900px) {
+            .app-wrapper {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+            .dashboard-panel {
+                max-width: 100%;
+                flex: 1 1 auto;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 16px 30px;
+                padding: 20px 24px;
+                border-radius: 32px;
+            }
+            .dashboard-panel .panel-header {
+                width: 100%;
+                border-bottom: 2px dashed rgba(26, 95, 180, 0.10);
+                padding-bottom: 12px;
+                margin-bottom: 4px;
+            }
+            .stats-list {
+                flex-direction: row;
+                flex-wrap: wrap;
+                flex: 1 1 100%;
+            }
+            .stat-item {
+                flex: 1 1 160px;
+            }
+            .quick-actions {
+                flex-direction: row;
+                flex-wrap: wrap;
+                flex: 1 1 100%;
+            }
+            .quick-actions button {
+                flex: 1 1 140px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .booking-card {
+                padding: 20px 18px 30px;
+                border-radius: 32px;
+            }
+            .dashboard-panel {
+                padding: 16px;
+                border-radius: 28px;
+            }
+            .stat-item {
+                flex: 1 1 120px;
+                padding: 12px;
+            }
+            .quick-actions button {
+                flex: 1 1 100%;
+            }
+        }
+
+        /* الهيدر (داخل بطاقة الحجز) */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px dashed rgba(0, 80, 200, 0.15);
+            padding-bottom: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title i {
+            font-size: 2.6rem;
+            color: #1a5fb4;
+            background: rgba(26, 95, 180, 0.10);
+            padding: 12px;
+            border-radius: 30px;
+            box-shadow: 0 8px 12px rgba(26, 95, 180, 0.10);
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0a2942;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .header-title h1 span {
+            color: #1a5fb4;
+            background: linear-gradient(135deg, #1a5fb4, #3b8cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .badge-year {
+            background: #1a5fb4;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: 0 8px 14px rgba(26, 95, 180, 0.30);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 550px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .header-title h1 {
+                font-size: 1.6rem;
+            }
+            .badge-year {
+                font-size: 1rem;
+                padding: 6px 16px;
+            }
+        }
+
+        /* معلومات الطالب */
+        .student-info {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px 25px;
+            border-radius: 28px;
+            margin-bottom: 35px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 20px 30px;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .student-info .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a2b3e;
+        }
+
+        .student-info .info-item i {
+            color: #1a5fb4;
+            font-size: 1.3rem;
+            width: 28px;
+            text-align: center;
+        }
+
+        .student-info .info-item span {
+            font-weight: 400;
+            color: #1f3a57;
+            background: white;
+            padding: 5px 16px;
+            border-radius: 40px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .edit-profile-btn {
+            margin-right: auto;
+            background: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #1a5fb4;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(26, 95, 180, 0.15);
+        }
+
+        .edit-profile-btn:hover {
+            background: #1a5fb4;
+            color: white;
+            border-color: #1a5fb4;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 650px) {
+            .student-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .edit-profile-btn {
+                margin-right: 0;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* شبكة المواد */
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 22px;
+            margin: 30px 0 35px;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 28px;
+            padding: 22px 20px 20px;
+            box-shadow: 0 12px 24px rgba(0, 20, 40, 0.06);
+            transition: all 0.25s ease;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: default;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 40px rgba(26, 95, 180, 0.12);
+            border-color: rgba(26, 95, 180, 0.20);
+        }
+
+        .subject-card .subject-icon {
+            font-size: 2.2rem;
+            color: #1a5fb4;
+            background: rgba(26, 95, 180, 0.06);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .subject-card h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0a1e30;
+            margin-bottom: 6px;
+        }
+
+        .subject-card .subject-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #406e96;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #eaf0f5;
+            padding-bottom: 12px;
+        }
+
+        .subject-card .subject-meta i {
+            margin-left: 6px;
+        }
+
+        .subject-card .exam-date {
+            background: #f0f7fe;
+            padding: 10px 12px;
+            border-radius: 18px;
+            font-weight: 600;
+            color: #0f3b60;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .subject-card .exam-date i {
+            color: #1a5fb4;
+        }
+
+        .btn-book {
+            background: linear-gradient(135deg, #1a5fb4, #2b7ae0);
+            border: none;
+            padding: 14px 10px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 10px 18px rgba(26, 95, 180, 0.25);
+            font-family: 'Cairo', sans-serif;
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-book:hover {
+            transform: scale(1.02);
+            box-shadow: 0 16px 28px rgba(26, 95, 180, 0.35);
+            background: linear-gradient(135deg, #134b9c, #1f6ad4);
+        }
+
+        .btn-book:active {
+            transform: scale(0.97);
+        }
+
+        .btn-book.booked {
+            background: #2b6f4b;
+            box-shadow: 0 8px 16px rgba(43, 111, 75, 0.25);
+            cursor: default;
+            opacity: 0.8;
+        }
+
+        .btn-book.booked i {
+            color: #b7e4c7;
+        }
+
+        .btn-book.booked:hover {
+            transform: none;
+            box-shadow: 0 8px 16px rgba(43, 111, 75, 0.25);
+        }
+
+        .booked-badge {
+            display: inline-block;
+            background: #e6f4ee;
+            color: #1c6e47;
+            font-size: 0.75rem;
+            padding: 3px 14px;
+            border-radius: 40px;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        /* ملخص الحجز */
+        .booking-summary {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 20px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.8);
+            margin-top: 20px;
+        }
+
+        .summary-stats {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .summary-stats div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #1a2b3e;
+        }
+
+        .summary-stats div i {
+            color: #1a5fb4;
+            font-size: 1.5rem;
+        }
+
+        .summary-stats div span {
+            background: white;
+            padding: 2px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: #0a2942;
+            font-size: 1.4rem;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .btn-reset {
+            background: rgba(0,0,0,0.02);
+            border: 1px solid #cddbe8;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #1f405e;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+
+        .btn-reset:hover {
+            background: #1a5fb4;
+            border-color: #1a5fb4;
+            color: white;
+            box-shadow: 0 8px 16px rgba(26, 95, 180, 0.15);
+        }
+
+        @media (max-width: 600px) {
+            .booking-summary {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 18px;
+            }
+            .summary-stats {
+                gap: 20px;
+                width: 100%;
+                justify-content: space-between;
+            }
+            .btn-reset {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* رسائل toast */
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #1a2b3e;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .toast-message i {
+            font-size: 1.6rem;
+            color: #7fc1ff;
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #406e96;
+            text-align: center;
+            border-top: 1px solid rgba(0,0,0,0.03);
+            padding-top: 18px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .footer-note i {
+            color: #1a5fb4;
+        }
+
+        /* تنسيق إضافي للوحة */
+        .badge-dashboard {
+            background: #1a5fb4;
+            color: white;
+            border-radius: 40px;
+            padding: 2px 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-right: 6px;
+        }
+    </style>
 </head>
 <body>
-<div id="loadingOverlay" class="loading-overlay" style="display: flex;">
-    <div class="loading-spinner"></div>
-    <div>جاري الاتصال بقاعدة البيانات السحابية...</div>
+
+<div class="app-wrapper">
+    <!-- ===== لوحة التحكم (الشريط الجانبي) ===== -->
+    <aside class="dashboard-panel" id="dashboardPanel">
+        <div class="panel-header">
+            <i class="fas fa-sliders-h"></i>
+            <h2>لوحة <span>التحكم</span></h2>
+        </div>
+
+        <!-- الإحصائيات -->
+        <div>
+            <div class="panel-section-title"><i class="fas fa-chart-pie"></i> إحصائيات سريعة</div>
+            <div class="stats-list">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">إجمالي المواد</div>
+                        <div class="stat-value" id="dashTotalSubjects">0</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">محجوز</div>
+                        <div class="stat-value" id="dashBookedCount">0 <small>/ 0</small></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">الطالب</div>
+                        <div class="stat-value" style="font-size: 1.1rem;">أحمد محمد</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- إجراءات سريعة -->
+        <div>
+            <div class="panel-section-title"><i class="fas fa-bolt"></i> إجراءات سريعة</div>
+            <div class="quick-actions">
+                <button id="dashAddSubject"><i class="fas fa-plus-circle"></i> إضافة مادة</button>
+                <button id="dashExport"><i class="fas fa-file-export"></i> تصدير الحجوزات</button>
+                <button id="dashReset" class="danger"><i class="fas fa-trash-alt"></i> إلغاء الكل</button>
+            </div>
+        </div>
+
+        <!-- معلومات إضافية -->
+        <div style="margin-top: auto; border-top: 1px solid rgba(0,0,0,0.04); padding-top: 16px; font-size: 0.8rem; color: #5a7f9a;">
+            <i class="fas fa-database"></i> آخر تحديث: <span id="dashTimestamp">الآن</span>
+        </div>
+    </aside>
+
+    <!-- ===== بطاقة الحجز الرئيسية ===== -->
+    <main class="booking-card" id="app">
+
+        <!-- الهيدر -->
+        <div class="header">
+            <div class="header-title">
+                <i class="fas fa-pen-to-square"></i>
+                <h1>حجز <span>الامتحانات</span></h1>
+            </div>
+            <div class="badge-year">
+                <i class="fas fa-calendar-check"></i> 2026 · الثانوية
+            </div>
+        </div>
+
+        <!-- معلومات الطالب -->
+        <div class="student-info">
+            <div class="info-item">
+                <i class="fas fa-user-graduate"></i>
+                <span>أحمد محمد</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-id-card"></i>
+                <span>٣ث / علمي</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-school"></i>
+                <span>مدرسة النخبة</span>
+            </div>
+            <button class="edit-profile-btn" id="editProfileBtn"><i class="fas fa-user-pen"></i> تعديل الملف</button>
+        </div>
+
+        <!-- شبكة المواد -->
+        <div class="subjects-grid" id="subjectsContainer">
+            <!-- سيتم توليد المواد عبر JS -->
+        </div>
+
+        <!-- ملخص الحجز -->
+        <div class="booking-summary">
+            <div class="summary-stats">
+                <div>
+                    <i class="fas fa-book-open"></i>
+                    <span id="totalSubjects">0</span> مادة
+                </div>
+                <div>
+                    <i class="fas fa-check-circle"></i>
+                    <span id="bookedCount">0</span> محجوز
+                </div>
+            </div>
+            <button class="btn-reset" id="resetBookingsBtn"><i class="fas fa-rotate-right"></i> إلغاء الكل</button>
+        </div>
+
+        <!-- تذييل -->
+        <div class="footer-note">
+            <i class="fas fa-shield-alt"></i> بيانات آمنة · تحديث فوري
+            <i class="fas fa-circle" style="font-size: 0.4rem; color: #b0c9df; align-self: center;"></i>
+            <span>⚡ نظام حجز متقدم</span>
+        </div>
+    </main>
 </div>
 
-<div class="container" style="display: none;">
-    <!-- connection status -->
-    <div class="connection-status" id="connStatus">
-        <i class="fas fa-circle" style="color: #ffaa00; font-size: 10px;"></i>
-        <span>جاري الاتصال...</span>
-    </div>
-
-    <!-- header premium -->
-    <div class="header-premium">
-        <h1><i class="fas fa-cloud-upload-alt"></i> نظام حجز العيادات - سحابي <i class="fas fa-calendar-check"></i></h1>
-        <div class="stats-5grid">
-            <div class="stat-modern"><div class="stat-icon"><i class="fas fa-calendar-alt"></i></div><div class="stat-info"><h3 id="totalCount">0</h3><p>إجمالي الحجوزات</p></div></div>
-            <div class="stat-modern"><div class="stat-icon"><i class="fas fa-sun"></i></div><div class="stat-info"><h3 id="todayCount">0</h3><p>حجوزات اليوم</p></div></div>
-            <div class="stat-modern"><div class="stat-icon waiting-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><h3 id="waitingCount">0</h3><p>في الانتظار</p></div></div>
-            <div class="stat-modern"><div class="stat-icon progress-icon"><i class="fas fa-spinner"></i></div><div class="stat-info"><h3 id="progressCount">0</h3><p>قيد الكشف</p></div></div>
-            <div class="stat-modern"><div class="stat-icon completed-icon"><i class="fas fa-check-circle"></i></div><div class="stat-info"><h3 id="completedCount">0</h3><p>تم الكشف</p></div></div>
-        </div>
-    </div>
-
-    <!-- form section premium -->
-    <div class="card-glass">
-        <div class="section-title"><i class="fas fa-pen-alt"></i><span id="formTitle">طلب حجز كشف جديد</span></div>
-        <div class="form-luxury">
-            <div class="input-elevated"><label><i class="fas fa-user"></i> اسم المريض</label><input type="text" id="patientName" placeholder="مثال: أحمد السيد" required></div>
-            <div class="input-elevated"><label><i class="fas fa-stethoscope"></i> اسم الدكتور</label><input type="text" id="doctorName" placeholder="د. محمد العلي" required></div>
-            <div class="input-elevated"><label><i class="fas fa-microscope"></i> التخصص</label>
-                <select id="specialty" required>
-                    <option value="">اختر التخصص</option>
-                    <option>باطنة</option>
-                    <option>أسنان</option>
-                    <option>جلدية</option>
-                    <option>أطفال</option>
-                    <option>عظام</option>
-                    <option>نساء وتوليد</option>
-                    <option>قلب</option>
-                    <option>مخ وأعصاب</option>
-                </select>
-            </div>
-            <div class="input-elevated"><label><i class="fas fa-calendar-day"></i> التاريخ</label><input type="date" id="date" required></div>
-            <div class="input-elevated"><label><i class="fas fa-clock"></i> الوقت</label><input type="time" id="time" required></div>
-            <div class="input-elevated"><label><i class="fas fa-phone-alt"></i> رقم الهاتف</label><input type="tel" id="phone" placeholder="05xxxxxxxx" required></div>
-            <div class="input-elevated"><label><i class="fas fa-stethoscope"></i> نوع الخدمة</label>
-                <select id="serviceType">
-                    <option value="كشف عادي">كشف عادي</option>
-                    <option value="كشف متقدم">كشف متقدم</option>
-                    <option value="استشارة">استشارة</option>
-                    <option value="متابعة">متابعة</option>
-                    <option value="فحص">فحص</option>
-                </select>
-            </div>
-            <div class="input-elevated"><label><i class="fas fa-hourglass-half"></i> حالة الموعد</label>
-                <select id="statusSelect">
-                    <option value="في الانتظار">في الانتظار</option>
-                    <option value="قيد الكشف">قيد الكشف</option>
-                    <option value="تم الكشف">تم الكشف</option>
-                </select>
-            </div>
-            <div class="input-elevated" style="grid-column: 1 / -1;">
-                <label><i class="fas fa-comment"></i> ملاحظات إضافية</label>
-                <textarea id="notes" rows="2" placeholder="أي ملاحظات إضافية عن الحجز..." style="resize: vertical; min-height: 60px;"></textarea>
-            </div>
-        </div>
-        <div class="btn-group">
-            <button class="btn btn-primary" id="saveBtn"><i class="fas fa-save"></i> إرسال طلب الحجز</button>
-            <button class="btn btn-outline" id="cancelEditBtn" style="display: none;"><i class="fas fa-times-circle"></i> إلغاء التعديل</button>
-            <button class="btn btn-danger-light" id="deleteAllBtn"><i class="fas fa-trash-alt"></i> حذف الكل</button>
-        </div>
-    </div>
-
-    <!-- search & filters -->
-    <div class="card-glass" style="padding: 18px 24px;">
-        <div class="search-filter-bar">
-            <div class="search-wrapper"><i class="fas fa-search"></i><input type="text" id="globalSearch" placeholder="بحث باسم المريض، الدكتور، التخصص أو الهاتف..."></div>
-            <div class="filter-chips">
-                <div class="chip active" data-filter="all"><i class="fas fa-list"></i> الكل</div>
-                <div class="chip" data-filter="today"><i class="fas fa-calendar-day"></i> اليوم</div>
-                <div class="chip" data-filter="waiting"><i class="fas fa-clock"></i> في الانتظار</div>
-                <div class="chip" data-filter="in-progress"><i class="fas fa-spinner"></i> قيد الكشف</div>
-                <div class="chip" data-filter="completed"><i class="fas fa-check-circle"></i> تم الكشف</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- appointments dynamic grid -->
-    <div id="appointmentsGrid" class="grid-premium"></div>
-</div>
-
-<!-- Modal for confirmations -->
-<div class="modal-modern" id="confirmModal">
-    <div class="modal-card">
-        <i class="fas fa-question-circle" id="modalIcon"></i>
-        <h4 id="modalTitle" style="font-size: 20px; margin-bottom: 8px;">تأكيد</h4>
-        <p id="modalMessage" style="color: #5e7a93; margin-bottom: 20px;">هل أنت متأكد؟</p>
-        <div class="btn-group">
-            <button class="btn btn-outline" id="modalCancelBtn">إلغاء</button>
-            <button class="btn btn-primary" id="modalConfirmBtn">تأكيد</button>
-        </div>
-    </div>
+<!-- رسالة توست -->
+<div id="toastMessage" class="toast-message">
+    <i class="fas fa-circle-check"></i>
+    <span id="toastText">تم الحجز بنجاح</span>
 </div>
 
 <script>
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyB0p0us6BuzD2ngzjhRnmUIhlOcBeRp0vQ",
-    authDomain: "tok-tak-d6e17.firebaseapp.com",
-    databaseURL: "https://tok-tak-d6e17-default-rtdb.firebaseio.com",
-    projectId: "tok-tak-d6e17",
-    storageBucket: "tok-tak-d6e17.appspot.com",
-    messagingSenderId: "547062578826",
-    appId: "1:547062578826:web:aa285cf798341be07cb773",
-    measurementId: "G-7EMKEQKPVV"
-};
+    (function() {
+        "use strict";
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const appointmentsRef = database.ref('appointments');
+        // ---------- بيانات المواد (ثابتة) ----------
+        const subjectsData = [
+            { id: 1, name: "اللغة العربية", icon: "fa-book", date: "2026-06-15", time: "09:00 ص" },
+            { id: 2, name: "اللغة الإنجليزية", icon: "fa-language", date: "2026-06-17", time: "11:00 ص" },
+            { id: 3, name: "الرياضيات", icon: "fa-calculator", date: "2026-06-19", time: "09:00 ص" },
+            { id: 4, name: "الفيزياء", icon: "fa-flask", date: "2026-06-21", time: "10:00 ص" },
+            { id: 5, name: "الكيمياء", icon: "fa-vial", date: "2026-06-23", time: "09:00 ص" },
+            { id: 6, name: "الأحياء", icon: "fa-dna", date: "2026-06-25", time: "11:00 ص" },
+        ];
 
-let appointments = [];
-let editModeId = null;
-let currentFilter = "all";
-let searchQuery = "";
-let isLoading = true;
-let confirmResolve = null;
+        // ---------- الحالة (state) ----------
+        let bookings = new Array(subjectsData.length).fill(false);   // true = محجوز
 
-// DOM Elements
-const patientNameInp = document.getElementById("patientName");
-const doctorNameInp = document.getElementById("doctorName");
-const specialtySelect = document.getElementById("specialty");
-const dateInp = document.getElementById("date");
-const timeInp = document.getElementById("time");
-const phoneInp = document.getElementById("phone");
-const serviceTypeSelect = document.getElementById("serviceType");
-const statusSelect = document.getElementById("statusSelect");
-const notesInp = document.getElementById("notes");
-const saveBtn = document.getElementById("saveBtn");
-const cancelEditBtn = document.getElementById("cancelEditBtn");
-const deleteAllBtn = document.getElementById("deleteAllBtn");
-const formTitleSpan = document.getElementById("formTitle");
-const appointmentsGrid = document.getElementById("appointmentsGrid");
-const globalSearch = document.getElementById("globalSearch");
-const loadingOverlay = document.getElementById("loadingOverlay");
-const mainContainer = document.querySelector(".container");
-const connStatusSpan = document.getElementById("connStatus");
-const confirmModal = document.getElementById("confirmModal");
-const modalIcon = document.getElementById("modalIcon");
-const modalTitle = document.getElementById("modalTitle");
-const modalMessage = document.getElementById("modalMessage");
-const modalCancelBtn = document.getElementById("modalCancelBtn");
-const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+        // عناصر DOM الرئيسية
+        const subjectsContainer = document.getElementById('subjectsContainer');
+        const totalSubjectsSpan = document.getElementById('totalSubjects');
+        const bookedCountSpan = document.getElementById('bookedCount');
+        const resetBtn = document.getElementById('resetBookingsBtn');
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const toastEl = document.getElementById('toastMessage');
+        const toastText = document.getElementById('toastText');
 
-const getTodayStr = () => new Date().toISOString().split("T")[0];
-const todayStr = getTodayStr();
-dateInp.min = todayStr;
+        // عناصر لوحة التحكم
+        const dashTotal = document.getElementById('dashTotalSubjects');
+        const dashBooked = document.getElementById('dashBookedCount');
+        const dashTimestamp = document.getElementById('dashTimestamp');
+        const dashAddBtn = document.getElementById('dashAddSubject');
+        const dashExportBtn = document.getElementById('dashExport');
+        const dashResetBtn = document.getElementById('dashReset');
 
-// Helper Functions
-function showToast(msg, isError = false) {
-    const existing = document.querySelector(".toast-notify");
-    if(existing) existing.remove();
-    const toast = document.createElement("div");
-    toast.className = "toast-notify";
-    toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${msg}`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2700);
-}
+        let toastTimeout = null;
 
-function updateConnectionStatus(connected) {
-    if(connected) {
-        connStatusSpan.innerHTML = '<i class="fas fa-circle" style="color: #4caf50; font-size: 10px;"></i><span>متصل بالسحابة</span>';
-    } else {
-        connStatusSpan.innerHTML = '<i class="fas fa-circle" style="color: #f44336; font-size: 10px;"></i><span>غير متصل - وضع غير متصل</span>';
-    }
-}
-
-// Custom confirm dialog
-function showConfirm(icon, title, message) {
-    return new Promise((resolve) => {
-        modalIcon.className = `fas ${icon}`;
-        modalTitle.textContent = title;
-        modalMessage.textContent = message;
-        confirmModal.classList.add('active');
-        confirmResolve = resolve;
-    });
-}
-
-modalCancelBtn.onclick = () => {
-    confirmModal.classList.remove('active');
-    if(confirmResolve) confirmResolve(false);
-};
-
-modalConfirmBtn.onclick = () => {
-    confirmModal.classList.remove('active');
-    if(confirmResolve) confirmResolve(true);
-};
-
-// Listen for connection status
-database.ref('.info/connected').on('value', (snap) => {
-    updateConnectionStatus(snap.val());
-    if(snap.val()) {
-        showToast("✅ متصل بقاعدة البيانات السحابية", false);
-    } else {
-        showToast("⚠️ فقدان الاتصال بالإنترنت", true);
-    }
-});
-
-// Real-time listener for appointments
-appointmentsRef.on('value', (snapshot) => {
-    const data = snapshot.val();
-    if(data) {
-        appointments = Object.entries(data).map(([id, value]) => ({
-            firebaseId: id,
-            id: value.originalId || parseInt(id),
-            patient: value.patient || '',
-            doctor: value.doctor || '',
-            spec: value.spec || '',
-            date: value.date || '',
-            time: value.time || '',
-            phone: value.phone || '',
-            serviceType: value.serviceType || 'كشف عادي',
-            status: value.status || 'في الانتظار',
-            notes: value.notes || '',
-            createdAt: value.createdAt || ''
-        }));
-    } else {
-        appointments = [];
-    }
-    
-    if(isLoading) {
-        isLoading = false;
-        loadingOverlay.style.display = "none";
-        mainContainer.style.display = "block";
-        showToast("تم تحميل البيانات من السحابة بنجاح", false);
-    }
-    
-    updateAllStats();
-    renderAppointments();
-    remindTodayAppointments();
-}, (error) => {
-    console.error("Firebase error:", error);
-    if(isLoading) {
-        isLoading = false;
-        loadingOverlay.style.display = "none";
-        mainContainer.style.display = "block";
-        showToast("⚠️ مشكلة في الاتصال - بيانات محلية فقط", true);
-    }
-});
-
-function updateAllStats() {
-    const total = appointments.length;
-    const todayCount = appointments.filter(a => a.date === todayStr).length;
-    const waitingCount = appointments.filter(a => a.status === 'في الانتظار').length;
-    const progressCount = appointments.filter(a => a.status === 'قيد الكشف').length;
-    const completedCount = appointments.filter(a => a.status === 'تم الكشف').length;
-    
-    document.getElementById("totalCount").innerText = total;
-    document.getElementById("todayCount").innerText = todayCount;
-    document.getElementById("waitingCount").innerText = waitingCount;
-    document.getElementById("progressCount").innerText = progressCount;
-    document.getElementById("completedCount").innerText = completedCount;
-}
-
-function clearForm() {
-    patientNameInp.value = "";
-    doctorNameInp.value = "";
-    specialtySelect.value = "";
-    dateInp.value = "";
-    timeInp.value = "";
-    phoneInp.value = "";
-    serviceTypeSelect.value = "كشف عادي";
-    statusSelect.value = "في الانتظار";
-    notesInp.value = "";
-}
-
-function resetEditMode() {
-    editModeId = null;
-    formTitleSpan.innerHTML = "طلب حجز كشف جديد";
-    cancelEditBtn.style.display = "none";
-    clearForm();
-}
-
-function getFilteredAppointments() {
-    let filtered = [...appointments];
-    
-    if(currentFilter === "today") {
-        filtered = filtered.filter(a => a.date === todayStr);
-    } else if(currentFilter === "waiting") {
-        filtered = filtered.filter(a => a.status === 'في الانتظار');
-    } else if(currentFilter === "in-progress") {
-        filtered = filtered.filter(a => a.status === 'قيد الكشف');
-    } else if(currentFilter === "completed") {
-        filtered = filtered.filter(a => a.status === 'تم الكشف');
-    }
-
-    if(searchQuery.trim() !== "") {
-        const q = searchQuery.trim().toLowerCase();
-        filtered = filtered.filter(a => 
-            (a.patient || '').toLowerCase().includes(q) ||
-            (a.doctor || '').toLowerCase().includes(q) ||
-            (a.spec || '').toLowerCase().includes(q) ||
-            (a.phone || '').toLowerCase().includes(q) ||
-            (a.serviceType || '').toLowerCase().includes(q)
-        );
-    }
-    
-    // Sort: waiting first, then in-progress, then completed, then by date/time
-    const statusOrder = { 'في الانتظار': 0, 'قيد الكشف': 1, 'تم الكشف': 2 };
-    filtered.sort((a,b) => {
-        const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3);
-        if(statusDiff !== 0) return statusDiff;
-        return (a.date + a.time).localeCompare(b.date + b.time);
-    });
-    return filtered;
-}
-
-function formatDisplayDate(dateStr) {
-    if(dateStr === todayStr) return "اليوم";
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("ar-EG", { year:'numeric', month:'short', day:'numeric' });
-}
-
-function escapeHtml(str) { 
-    if(!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if(m === '&') return '&amp;';
-        if(m === '<') return '&lt;';
-        if(m === '>') return '&gt;';
-        return m;
-    });
-}
-
-function getStatusBadge(status) {
-    const statusMap = {
-        'في الانتظار': { class: 'badge-waiting', icon: 'fa-clock', text: 'في الانتظار' },
-        'قيد الكشف': { class: 'badge-in-progress', icon: 'fa-spinner', text: 'قيد الكشف' },
-        'تم الكشف': { class: 'badge-completed', icon: 'fa-check-circle', text: 'تم الكشف' }
-    };
-    return statusMap[status] || statusMap['في الانتظار'];
-}
-
-function getAccentClass(status) {
-    const map = {
-        'في الانتظار': 'waiting',
-        'قيد الكشف': 'in-progress',
-        'تم الكشف': 'completed'
-    };
-    return map[status] || '';
-}
-
-function renderAppointments() {
-    const list = getFilteredAppointments();
-    if(list.length === 0) {
-        appointmentsGrid.innerHTML = `
-            <div class="empty-state-premium">
-                <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
-                <h3>لا توجد مواعيد</h3>
-                <p>ابدأ بإضافة حجز جديد عبر النموذج أعلاه</p>
-            </div>
-        `;
-        return;
-    }
-    
-    appointmentsGrid.innerHTML = list.map(app => {
-        const isToday = app.date === todayStr;
-        const isPast = app.date < todayStr;
-        const statusInfo = getStatusBadge(app.status);
-        const accentClass = getAccentClass(app.status);
-        
-        let dateBadge = '';
-        if(isToday) dateBadge = '📅 اليوم';
-        else if(isPast) dateBadge = '⏮️ منتهي';
-        else dateBadge = `📆 ${formatDisplayDate(app.date)}`;
-        
-        return `
-        <div class="appt-card">
-            <div class="card-accent ${accentClass}"></div>
-            <div class="card-body">
-                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
-                    <span class="badge-status ${statusInfo.class}"><i class="fas ${statusInfo.icon}"></i> ${statusInfo.text}</span>
-                    <span class="badge-status badge-today">${dateBadge}</span>
-                    <span class="badge-status badge-service"><i class="fas fa-stethoscope"></i> ${escapeHtml(app.serviceType)}</span>
-                </div>
-                <div class="appt-detail-grid">
-                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-user-injured"></i></div><div class="detail-text"><div class="detail-label">المريض</div><div class="detail-value">${escapeHtml(app.patient)}</div></div></div>
-                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-user-md"></i></div><div class="detail-text"><div class="detail-label">الدكتور</div><div class="detail-value">${escapeHtml(app.doctor)}</div></div></div>
-                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-microscope"></i></div><div class="detail-text"><div class="detail-label">التخصص</div><div class="detail-value">${escapeHtml(app.spec)}</div></div></div>
-                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-calendar-alt"></i></div><div class="detail-text"><div class="detail-label">التاريخ والوقت</div><div class="detail-value">${escapeHtml(app.date)} - ${escapeHtml(app.time)}</div></div></div>
-                    <div class="detail-row"><div class="detail-icon"><i class="fas fa-phone-alt"></i></div><div class="detail-text"><div class="detail-label">الهاتف</div><div class="detail-value">${escapeHtml(app.phone)}</div></div></div>
-                    ${app.notes ? `<div class="detail-row"><div class="detail-icon"><i class="fas fa-comment"></i></div><div class="detail-text"><div class="detail-label">ملاحظات</div><div class="detail-value" style="font-weight: 400; font-size: 14px;">${escapeHtml(app.notes)}</div></div></div>` : ''}
-                </div>
-                <div class="card-actions-flex">
-                    ${app.status === 'في الانتظار' ? `<button class="btn-sm btn-sm-success" onclick="updateStatus('${app.firebaseId}', 'قيد الكشف')"><i class="fas fa-play"></i> بدء الكشف</button>` : ''}
-                    ${app.status === 'قيد الكشف' ? `<button class="btn-sm btn-sm-info" onclick="updateStatus('${app.firebaseId}', 'تم الكشف')"><i class="fas fa-check"></i> إنهاء الكشف</button>` : ''}
-                    ${app.status === 'تم الكشف' ? `<button class="btn-sm btn-sm-warning" onclick="updateStatus('${app.firebaseId}', 'في الانتظار')"><i class="fas fa-undo"></i> إعادة</button>` : ''}
-                    <button class="btn-sm" onclick="editAppointment('${app.firebaseId}')"><i class="fas fa-edit"></i> تعديل</button>
-                    <button class="btn-sm btn-sm-danger" onclick="deleteAppointment('${app.firebaseId}')"><i class="fas fa-trash"></i> حذف</button>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-}
-
-// Firebase CRUD Operations
-async function saveAppointment() {
-    const patient = patientNameInp.value.trim();
-    const doctor = doctorNameInp.value.trim();
-    const spec = specialtySelect.value;
-    const date = dateInp.value;
-    const time = timeInp.value;
-    const phone = phoneInp.value.trim() || "غير مدخل";
-    const serviceType = serviceTypeSelect.value;
-    const status = statusSelect.value;
-    const notes = notesInp.value.trim();
-
-    if (!patient || !doctor || !spec || !date || !time || !phone) {
-        showToast("يرجى ملء جميع الحقول المطلوبة", true);
-        return;
-    }
-
-    // Check for conflicts
-    const conflict = appointments.find(a => 
-        a.doctor.toLowerCase() === doctor.toLowerCase() && 
-        a.date === date && 
-        a.time === time && 
-        (!editModeId || a.firebaseId !== editModeId)
-    );
-
-    if(conflict) {
-        showToast(`❌ الدكتور ${doctor} لديه موعد في نفس الوقت`, true);
-        return;
-    }
-
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري الحفظ...';
-
-    try {
-        if(editModeId) {
-            await appointmentsRef.child(editModeId).update({
-                patient, doctor, spec, date, time, phone, serviceType, status, notes
-            });
-            showToast("✅ تم تعديل الحجز بنجاح");
-            resetEditMode();
-        } else {
-            const newId = Date.now();
-            await appointmentsRef.push({
-                originalId: newId,
-                patient, doctor, spec, date, time, phone, serviceType, status, notes,
-                createdAt: new Date().toISOString()
-            });
-            showToast("✅ تم إرسال طلب الحجز بنجاح");
-            clearForm();
+        // ---------- وظائف مساعدة ----------
+        function showToast(message, isSuccess = true) {
+            toastText.textContent = message;
+            toastEl.querySelector('i').className = isSuccess ? 'fas fa-circle-check' : 'fas fa-circle-exclamation';
+            toastEl.classList.add('show');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 3000);
         }
-    } catch (error) {
-        console.error("Save error:", error);
-        showToast("❌ فشل الحفظ - تأكد من الاتصال بالإنترنت", true);
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fas fa-save"></i> إرسال طلب الحجز';
-    }
-}
 
-async function deleteAppointment(firebaseId) {
-    if(!firebaseId) return;
-    
-    const confirmed = await showConfirm('fa-trash-alt', 'حذف الحجز', 'هل أنت متأكد من حذف هذا الحجز؟');
-    if(!confirmed) return;
-    
-    try {
-        await appointmentsRef.child(firebaseId).remove();
-        showToast("✅ تم حذف الموعد بنجاح");
-        if(editModeId === firebaseId) resetEditMode();
-    } catch (error) {
-        showToast("❌ فشل الحذف", true);
-    }
-}
+        // تحديث جميع العدادات (البطاقة الرئيسية + لوحة التحكم)
+        function updateAllCounters() {
+            const total = subjectsData.length;
+            const booked = bookings.filter(v => v === true).length;
+            
+            // البطاقة الرئيسية
+            totalSubjectsSpan.textContent = total;
+            bookedCountSpan.textContent = booked;
 
-async function updateStatus(firebaseId, newStatus) {
-    if(!firebaseId) return;
-    
-    const statusMap = {
-        'في الانتظار': 'بدء الكشف',
-        'قيد الكشف': 'إنهاء الكشف',
-        'تم الكشف': 'إعادة الحجز'
-    };
-    
-    const confirmed = await showConfirm('fa-exchange-alt', 'تحديث الحالة', `هل أنت متأكد من ${statusMap[newStatus] || 'تحديث الحالة'}؟`);
-    if(!confirmed) return;
-    
-    try {
-        await appointmentsRef.child(firebaseId).update({ status: newStatus });
-        showToast(`✅ تم تحديث الحالة إلى "${newStatus}"`);
-    } catch (error) {
-        showToast("❌ فشل تحديث الحالة", true);
-    }
-}
+            // لوحة التحكم
+            dashTotal.textContent = total;
+            dashBooked.innerHTML = `${booked} <small>/ ${total}</small>`;
+            
+            // تحديث الطابع الزمني
+            const now = new Date();
+            dashTimestamp.textContent = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+        }
 
-async function deleteAllAppointments() {
-    if(appointments.length === 0) { showToast("لا توجد حجوزات للحذف", true); return; }
-    
-    const confirmed = await showConfirm('fa-exclamation-triangle', 'حذف الكل', '⚠️ هل أنت متأكد من حذف جميع الحجوزات؟ هذا الإجراء لا يمكن التراجع عنه');
-    if(!confirmed) return;
-    
-    try {
-        await appointmentsRef.remove();
-        showToast("✅ تم حذف جميع الحجوزات");
-        resetEditMode();
-    } catch (error) {
-        showToast("❌ فشل حذف الكل", true);
-    }
-}
+        // إعادة عرض البطاقات (render)
+        function renderSubjects() {
+            let html = '';
+            for (let i = 0; i < subjectsData.length; i++) {
+                const subj = subjectsData[i];
+                const isBooked = bookings[i];
+                const dateObj = new Date(subj.date + 'T00:00:00');
+                const formattedDate = dateObj.toLocaleDateString('ar-EG', { 
+                    year: 'numeric', month: 'long', day: 'numeric' 
+                });
 
-function editAppointment(firebaseId) {
-    const app = appointments.find(a => a.firebaseId === firebaseId);
-    if(!app) return;
-    
-    patientNameInp.value = app.patient;
-    doctorNameInp.value = app.doctor;
-    specialtySelect.value = app.spec;
-    dateInp.value = app.date;
-    timeInp.value = app.time;
-    phoneInp.value = app.phone;
-    serviceTypeSelect.value = app.serviceType || 'كشف عادي';
-    statusSelect.value = app.status || 'في الانتظار';
-    notesInp.value = app.notes || '';
-    editModeId = firebaseId;
-    formTitleSpan.innerHTML = "تعديل الحجز";
-    cancelEditBtn.style.display = "inline-flex";
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
+                html += `
+                    <div class="subject-card" data-index="${i}">
+                        <div class="subject-icon">
+                            <i class="fas ${subj.icon}"></i>
+                        </div>
+                        <h3>${subj.name}</h3>
+                        <div class="subject-meta">
+                            <span><i class="fas fa-calendar-day"></i> ${formattedDate}</span>
+                            <span><i class="fas fa-clock"></i> ${subj.time}</span>
+                        </div>
+                        <div class="exam-date">
+                            <i class="fas fa-stopwatch"></i> الامتحان: ${formattedDate} · ${subj.time}
+                        </div>
+                        <button class="btn-book ${isBooked ? 'booked' : ''}" data-index="${i}">
+                            ${isBooked ? '<i class="fas fa-check-circle"></i> تم الحجز' : '<i class="fas fa-pen"></i> احجز الآن'}
+                            ${isBooked ? '<span class="booked-badge">مؤكد</span>' : ''}
+                        </button>
+                    </div>
+                `;
+            }
+            subjectsContainer.innerHTML = html;
+            updateAllCounters();
 
-function cancelEdit() {
-    resetEditMode();
-}
+            // إعادة ربط الأحداث للأزرار
+            document.querySelectorAll('.btn-book').forEach(btn => {
+                btn.addEventListener('click', handleBookingToggle);
+            });
+        }
 
-function setActiveFilter(filter) {
-    currentFilter = filter;
-    document.querySelectorAll(".chip").forEach(chip => {
-        if(chip.getAttribute("data-filter") === filter) chip.classList.add("active");
-        else chip.classList.remove("active");
-    });
-    renderAppointments();
-}
+        // معالج الضغط على زر الحجز
+        function handleBookingToggle(e) {
+            const btn = e.currentTarget;
+            const index = parseInt(btn.getAttribute('data-index'), 10);
+            if (isNaN(index)) return;
 
-function remindTodayAppointments() {
-    const todayApps = appointments.filter(a => a.date === todayStr);
-    if(todayApps.length > 0 && !isLoading) {
-        setTimeout(() => {
-            showToast(`🔔 لديك ${todayApps.length} موعد${todayApps.length > 1 ? 'ات' : ''} اليوم`, false);
-        }, 800);
-    }
-}
+            if (bookings[index] === true) {
+                showToast('❗ هذا الامتحان محجوز مسبقاً', false);
+                return;
+            }
 
-// Event Listeners
-saveBtn.onclick = saveAppointment;
-cancelEditBtn.onclick = cancelEdit;
-deleteAllBtn.onclick = deleteAllAppointments;
-globalSearch.addEventListener("input", (e) => { searchQuery = e.target.value; renderAppointments(); });
-document.querySelectorAll(".chip").forEach(chip => {
-    chip.addEventListener("click", (e) => {
-        const filterVal = chip.getAttribute("data-filter");
-        setActiveFilter(filterVal);
-    });
-});
+            bookings[index] = true;
+            renderSubjects();
+            const subjectName = subjectsData[index].name;
+            showToast(`✅ تم حجز ${subjectName} بنجاح`, true);
+        }
 
-// Make functions global for inline onclick
-window.editAppointment = editAppointment;
-window.deleteAppointment = deleteAppointment;
-window.updateStatus = updateStatus;
-</script>
-</body>
-    </html>
+        // إعادة ضبط جميع الحجوزات (من البطاقة أو لوحة التحكم)
+        function resetAllBookings() {
+            if (bookings.every(v => v === false)) {
+                showToast('📭 لا توجد حجوزات لإلغائها', false);
+                return;
+            }
+            bookings.fill(false);
+            renderSubjects();
+            showToast('🔄 تم إلغاء جميع الحجوزات', true);
+        }
+
+        // -------- محاكاة إضافة مادة (لوحة التحكم) --------
+        function handleAddSubject() {
+            const newSubject = {
+                id: Date.now(),
+                name: `مادة جديدة ${subjectsData.length + 1}`,
+                icon: "fa-star",
+                date: "2026-07-01",
+                time: "10:00 ص"
+            };
+            subjectsData.push(newSubject);
+            bookings.push(false);
+            renderSubjects();
+            showToast(`➕ تم إضافة "${newSubject.name}"`, true);
+        }
+
+        // -------- محاكاة تصدير الحجوزات --------
+        function handleExport() {
+            const bookedNames = subjectsData
+                .filter((_, idx) => bookings[idx] === true)
+                .map(s => s.name)
+                .join('، ');
+            if (bookedNames.length === 0) {
+                showToast('
