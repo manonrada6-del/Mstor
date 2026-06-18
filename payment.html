@@ -98,6 +98,25 @@
             background: #667eea;
             color: white;
         }
+        .btn-refresh {
+            padding: 8px 18px;
+            border: 2px solid #f59e0b;
+            border-radius: 50px;
+            background: transparent;
+            color: #f59e0b;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .btn-refresh:hover {
+            background: #f59e0b;
+            color: white;
+        }
         .payment-section {
             background: white;
             border-radius: 24px;
@@ -205,6 +224,10 @@
         .btn-submit:active {
             transform: scale(0.97);
         }
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
         .payment-history {
             background: white;
             border-radius: 24px;
@@ -267,6 +290,38 @@
             background: #fffbeb;
             color: #f59e0b;
         }
+
+        /* Pending Bookings List */
+        .pending-bookings {
+            background: #fffbeb;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border: 1px solid #fcd34d;
+        }
+        .pending-bookings h4 {
+            color: #92400e;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pending-bookings .booking-tag {
+            display: inline-block;
+            background: white;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+            margin: 4px 6px 4px 0;
+        }
+        .pending-bookings .booking-tag i {
+            margin-left: 4px;
+            color: #f59e0b;
+        }
+
         .toast {
             position: fixed;
             bottom: 30px;
@@ -301,6 +356,44 @@
         .toast i {
             font-size: 1.5rem;
         }
+        .toast .close-toast {
+            margin-right: auto;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .toast .close-toast:hover {
+            color: white;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .no-bookings-msg {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8;
+        }
+        .no-bookings-msg i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
             .app-header {
                 padding: 12px 16px;
@@ -323,6 +416,9 @@
                 max-width: none;
                 bottom: 16px;
             }
+            .pending-bookings {
+                padding: 12px 14px;
+            }
         }
     </style>
 </head>
@@ -335,12 +431,24 @@
             </div>
             <div class="header-actions">
                 <div class="user-badge"><i class="fas fa-user-circle"></i> <span id="userName">مرحباً، طالب</span></div>
+                <button class="btn-refresh" onclick="loadData()"><i class="fas fa-sync-alt"></i> تحديث</button>
                 <a href="booking.html" class="btn-back"><i class="fas fa-arrow-right"></i> العودة</a>
             </div>
         </header>
 
         <div class="payment-section">
             <h2><i class="fas fa-credit-card"></i> دفع رسوم الامتحانات</h2>
+
+            <!-- Pending Bookings -->
+            <div class="pending-bookings" id="pendingBookingsContainer">
+                <h4><i class="fas fa-hourglass-half"></i> الحجوزات المعلقة (تحتاج دفع)</h4>
+                <div id="pendingBookingsList">
+                    <div class="no-bookings-msg">
+                        <i class="fas fa-inbox"></i>
+                        <p>لا توجد حجوزات معلقة</p>
+                    </div>
+                </div>
+            </div>
 
             <div class="bank-info">
                 <p><i class="fas fa-university"></i> <span class="highlight">معلومات الحساب البنكي:</span></p>
@@ -356,7 +464,7 @@
                     <input type="text" id="paymentName" placeholder="الاسم الكامل" required>
                 </div>
                 <div class="form-group">
-                    <label><i class="fas fa-book"></i> المادة</label>
+                    <label><i class="fas fa-book"></i> المادة المراد دفعها</label>
                     <select id="paymentSubject" required>
                         <option value="">اختر المادة</option>
                     </select>
@@ -369,24 +477,28 @@
                     <label><i class="fas fa-upload"></i> إيصال الدفع (صورة)</label>
                     <input type="file" id="paymentReceipt" accept="image/*" required>
                 </div>
-                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> إرسال الدفع</button>
+                <button type="submit" class="btn-submit" id="submitBtn"><i class="fas fa-paper-plane"></i> إرسال الدفع</button>
             </form>
         </div>
 
         <div class="payment-history">
             <h3><i class="fas fa-history"></i> سجل المدفوعات</h3>
             <div id="paymentHistory">
-                <p style="text-align:center;color:#94a3b8;padding:20px;">لا توجد مدفوعات حتى الآن</p>
+                <p style="text-align:center;color:#94a3b8;padding:20px;">جاري تحميل سجل المدفوعات...</p>
             </div>
         </div>
     </div>
 
     <div class="toast" id="toast">
-        <i class="fas fa-circle-check"></i>
+        <i class="fas fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage">تم إرسال الدفع بنجاح</span>
+        <button class="close-toast" onclick="closeToast()"><i class="fas fa-times"></i></button>
     </div>
 
     <script>
+        // ============================================
+        // FIREBASE CONFIG
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyB0p0us6BuzD2ngzjhRnmUIhlOcBeRp0vQ",
             authDomain: "tok-tak-d6e17.firebaseapp.com",
@@ -398,9 +510,11 @@
         };
 
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const database = firebase.database();
 
+        // ============================================
+        // DATA
+        // ============================================
         const subjectsData = [
             { id: 1, name: 'اللغة العربية', price: 150 },
             { id: 2, name: 'اللغة الإنجليزية', price: 150 },
@@ -410,73 +524,245 @@
             { id: 6, name: 'الأحياء', price: 150 },
         ];
 
+        // ============================================
+        // STATE
+        // ============================================
         let currentUser = null;
+        let pendingBookings = [];
+        let paymentsData = [];
 
+        // ============================================
+        // DOM REFS
+        // ============================================
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+        const paymentForm = document.getElementById('paymentForm');
+        const paymentSubject = document.getElementById('paymentSubject');
+        const pendingBookingsList = document.getElementById('pendingBookingsList');
+        const paymentHistory = document.getElementById('paymentHistory');
+        const submitBtn = document.getElementById('submitBtn');
+
         let toastTimeout;
 
+        // ============================================
+        // SESSION
+        // ============================================
+        function getSession() {
+            const session = localStorage.getItem('exam_session');
+            return session ? JSON.parse(session) : null;
+        }
+
+        // ============================================
+        // TOAST
+        // ============================================
         function showToast(message, type = 'success') {
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-xmark',
+                warning: 'fa-triangle-exclamation'
+            };
             toast.className = `toast ${type}`;
+            toastIcon.className = `fas ${icons[type] || icons.success}`;
             toastMessage.textContent = message;
             toast.classList.add('show');
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('userName').textContent = `مرحباً، ${user.displayName || 'طالب'}`;
-                document.getElementById('paymentName').value = user.displayName || '';
-                loadPayments(user.uid);
-                populateSubjects();
-            } else {
+        function closeToast() {
+            toast.classList.remove('show');
+            clearTimeout(toastTimeout);
+        }
+
+        // ============================================
+        // LOAD DATA
+        // ============================================
+        function loadData() {
+            const session = getSession();
+            if (!session) {
                 window.location.href = 'login.html';
+                return;
             }
-        });
 
-        function populateSubjects() {
-            const select = document.getElementById('paymentSubject');
-            subjectsData.forEach(s => {
-                select.innerHTML += `<option value="${s.id}">${s.name} - ${s.price} ج.م</option>`;
-            });
+            currentUser = session;
+            document.getElementById('userName').textContent = `مرحباً، ${session.name || 'طالب'}`;
+            document.getElementById('paymentName').value = session.name || '';
+
+            loadPendingBookings(session.email);
+            loadPayments(session.email);
+            populateSubjects();
         }
 
-        function loadPayments(uid) {
-            database.ref(`payments/${uid}`).on('value', snapshot => {
+        // ============================================
+        // LOAD PENDING BOOKINGS
+        // ============================================
+        function loadPendingBookings(email) {
+            const userKey = email.replace(/[.#$\/\[\]]/g, '_');
+            const bookingsRef = database.ref(`bookings/${userKey}`);
+
+            bookingsRef.on('value', snapshot => {
                 const data = snapshot.val();
-                const history = document.getElementById('paymentHistory');
-                if (!data) {
-                    history.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:20px;">لا توجد مدفوعات حتى الآن</p>';
-                    return;
+                pendingBookings = [];
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        const booking = data[key];
+                        if (booking.status === 'pending') {
+                            pendingBookings.push({
+                                id: key,
+                                ...booking
+                            });
+                        }
+                    });
                 }
-                let html = '';
-                Object.keys(data).forEach(key => {
-                    const p = data[key];
-                    const statusClass = p.status === 'approved' ? 'approved' : p.status === 'rejected' ? 'rejected' : 'pending';
-                    const statusText = p.status === 'approved' ? 'مقبول ✓' : p.status === 'rejected' ? 'مرفوض ✗' : 'قيد المراجعة';
-                    const date = new Date(p.createdAt).toLocaleDateString('ar-EG');
-                    html += `
-                        <div class="payment-item">
-                            <div class="info">
-                                <span class="name">${p.subjectName}</span>
-                                <span class="date">${date}</span>
-                            </div>
-                            <div>
-                                <span class="amount">${p.amount} ج.م</span>
-                                <span class="status-pill ${statusClass}" style="margin-right:12px;">${statusText}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                history.innerHTML = html;
+
+                renderPendingBookings();
+            }, error => {
+                console.error('Error loading bookings:', error);
+                showToast('⚠️ خطأ في تحميل الحجوزات', 'error');
             });
         }
 
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        // ============================================
+        // RENDER PENDING BOOKINGS
+        // ============================================
+        function renderPendingBookings() {
+            if (pendingBookings.length === 0) {
+                pendingBookingsList.innerHTML = `
+                    <div class="no-bookings-msg">
+                        <i class="fas fa-inbox"></i>
+                        <p>لا توجد حجوزات معلقة تحتاج دفع</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            pendingBookings.forEach(booking => {
+                const subject = subjectsData.find(s => s.id === booking.subjectId);
+                const price = subject ? subject.price : booking.price || 150;
+                html += `
+                    <span class="booking-tag" onclick="selectSubject(${booking.subjectId})">
+                        <i class="fas fa-book"></i> ${booking.subjectName}
+                        <span style="color:#92400e;font-weight:700;">(${price} ج.م)</span>
+                    </span>
+                `;
+            });
+
+            pendingBookingsList.innerHTML = html + `
+                <div style="margin-top:8px;font-size:0.8rem;color:#92400e;">
+                    <i class="fas fa-info-circle"></i> اضغط على المادة لاختيارها للدفع
+                </div>
+            `;
+        }
+
+        // ============================================
+        // SELECT SUBJECT FROM PENDING
+        // ============================================
+        function selectSubject(subjectId) {
+            const select = paymentSubject;
+            const options = select.options;
+            for (let i = 0; i < options.length; i++) {
+                if (parseInt(options[i].value) === subjectId) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+            // Update amount
+            const subject = subjectsData.find(s => s.id === subjectId);
+            if (subject) {
+                document.getElementById('paymentAmount').value = subject.price;
+                showToast(`✅ تم اختيار ${subject.name} للدفع`, 'success');
+            }
+            // Scroll to form
+            paymentForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // ============================================
+        // POPULATE SUBJECTS
+        // ============================================
+        function populateSubjects() {
+            const select = paymentSubject;
+            select.innerHTML = '<option value="">اختر المادة</option>';
+
+            // Add all subjects
+            subjectsData.forEach(s => {
+                const isPending = pendingBookings.some(b => b.subjectId === s.id);
+                const label = isPending ? `⭐ ${s.name} - ${s.price} ج.م (معلقة)` : `${s.name} - ${s.price} ج.م`;
+                select.innerHTML += `<option value="${s.id}" ${isPending ? 'style="color:#f59e0b;font-weight:700;"' : ''}>${label}</option>`;
+            });
+        }
+
+        // ============================================
+        // LOAD PAYMENTS
+        // ============================================
+        function loadPayments(email) {
+            const userKey = email.replace(/[.#$\/\[\]]/g, '_');
+            const paymentsRef = database.ref(`payments/${userKey}`);
+
+            paymentsRef.on('value', snapshot => {
+                const data = snapshot.val();
+                paymentsData = [];
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        paymentsData.push({ id: key, ...data[key] });
+                    });
+                }
+
+                renderPaymentHistory();
+            }, error => {
+                console.error('Error loading payments:', error);
+                showToast('⚠️ خطأ في تحميل المدفوعات', 'error');
+            });
+        }
+
+        // ============================================
+        // RENDER PAYMENT HISTORY
+        // ============================================
+        function renderPaymentHistory() {
+            if (paymentsData.length === 0) {
+                paymentHistory.innerHTML = `
+                    <div class="no-bookings-msg">
+                        <i class="fas fa-credit-card"></i>
+                        <p>لا توجد مدفوعات حتى الآن</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            paymentsData.reverse().forEach(p => {
+                const statusClass = p.status === 'approved' ? 'approved' : p.status === 'rejected' ? 'rejected' : 'pending';
+                const statusText = p.status === 'approved' ? 'مقبول ✓' : p.status === 'rejected' ? 'مرفوض ✗' : 'قيد المراجعة';
+                const date = new Date(p.createdAt).toLocaleDateString('ar-EG');
+
+                html += `
+                    <div class="payment-item">
+                        <div class="info">
+                            <span class="name">${p.subjectName}</span>
+                            <span class="date">${date}</span>
+                        </div>
+                        <div>
+                            <span class="amount">${p.amount} ج.م</span>
+                            <span class="status-pill ${statusClass}" style="margin-right:12px;">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            paymentHistory.innerHTML = html;
+        }
+
+        // ============================================
+        // SUBMIT PAYMENT
+        // ============================================
+        paymentForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!currentUser) {
+
+            const session = getSession();
+            if (!session) {
                 showToast('⚠️ الرجاء تسجيل الدخول أولاً', 'error');
                 return;
             }
@@ -497,10 +783,23 @@
                 return;
             }
 
+            // Check if already paid
+            const existingPayment = paymentsData.find(p => p.subjectId === subjectId && p.status === 'approved');
+            if (existingPayment) {
+                showToast(`✅ تم دفع ${subject.name} مسبقاً`, 'warning');
+                return;
+            }
+
+            // Disable button
+            submitBtn.innerHTML = '<span class="spinner"></span> جاري الإرسال...';
+            submitBtn.disabled = true;
+
             const reader = new FileReader();
             reader.onload = function(e) {
-                const receiptData = e.target.result.substring(0, 100) + '...';
-                const paymentRef = database.ref(`payments/${currentUser.uid}`).push();
+                const receiptData = e.target.result.substring(0, 200) + '...';
+                const userKey = session.email.replace(/[.#$\/\[\]]/g, '_');
+                const paymentRef = database.ref(`payments/${userKey}`).push();
+
                 paymentRef.set({
                     studentName: name,
                     subjectId: subject.id,
@@ -511,14 +810,55 @@
                     createdAt: Date.now()
                 }).then(() => {
                     showToast('✅ تم إرسال إيصال الدفع بنجاح، في انتظار المراجعة', 'success');
-                    document.getElementById('paymentForm').reset();
+                    paymentForm.reset();
                     document.getElementById('paymentName').value = name;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الدفع';
+                    submitBtn.disabled = false;
+                    // Reload data
+                    loadData();
                 }).catch(err => {
+                    console.error('Error submitting payment:', err);
                     showToast('❌ حدث خطأ في إرسال الدفع', 'error');
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الدفع';
+                    submitBtn.disabled = false;
                 });
             };
+
+            reader.onerror = function() {
+                showToast('❌ حدث خطأ في قراءة الملف', 'error');
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الدفع';
+                submitBtn.disabled = false;
+            };
+
             reader.readAsDataURL(fileInput.files[0]);
         });
+
+        // ============================================
+        // INIT
+        // ============================================
+        function init() {
+            // Check session
+            const session = getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            loadData();
+
+            console.log('✅ تم تحميل صفحة الدفع');
+            console.log(`👤 المستخدم: ${session.email}`);
+            console.log(`📚 عدد المواد: ${subjectsData.length}`);
+        }
+
+        // Start
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Make functions global
+        window.selectSubject = selectSubject;
+        window.loadData = loadData;
+        window.closeToast = closeToast;
+        window.showToast = showToast;
     </script>
 </body>
-</html>
+    </html>
