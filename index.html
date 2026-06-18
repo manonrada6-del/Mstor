@@ -3,983 +3,1317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>حجز امتحانات تالتة ثانوي | لوحة التحكم</title>
-    <!-- Font Awesome 6 (مجانية) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Font (Cairo) -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <title>حجز امتحانات الثانوية العامة | منصة احترافية</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --primary-bg: #eff6ff;
+            --success: #16a34a;
+            --success-bg: #f0fdf4;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #f59e0b;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --radius: 1rem;
+            --radius-lg: 1.5rem;
+            --radius-xl: 2rem;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark Mode */
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #93bbfc;
+            --primary-bg: #1e293b;
+            --gray-50: #0f172a;
+            --gray-100: #1e293b;
+            --gray-200: #334155;
+            --gray-300: #475569;
+            --gray-400: #94a3b8;
+            --gray-500: #cbd5e1;
+            --gray-600: #e2e8f0;
+            --gray-700: #f1f5f9;
+            --gray-800: #f8fafc;
+            --gray-900: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
         body {
             font-family: 'Cairo', sans-serif;
-            background: linear-gradient(145deg, #f6f9fc 0%, #e9f2f9 100%);
+            background: var(--gray-50);
+            color: var(--gray-800);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            margin: 0;
+            transition: var(--transition);
         }
 
-        /* الحاوية الرئيسية مع لوحة التحكم */
-        .app-wrapper {
+        /* ===== APP CONTAINER ===== */
+        .app-container {
             max-width: 1200px;
             width: 100%;
-            display: flex;
-            flex-direction: row-reverse;
-            gap: 24px;
-            align-items: stretch;
         }
 
-        /* ===== لوحة التحكم (الشريط الجانبي) ===== */
-        .dashboard-panel {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-radius: 40px;
-            padding: 28px 20px;
-            min-width: 240px;
-            max-width: 280px;
-            flex: 1 1 240px;
-            box-shadow: 0 20px 40px rgba(0, 20, 40, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 28px;
-        }
-
-        .dashboard-panel .panel-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 2px dashed rgba(26, 95, 180, 0.15);
-            padding-bottom: 18px;
-        }
-
-        .dashboard-panel .panel-header i {
-            font-size: 2rem;
-            color: #1a5fb4;
-            background: rgba(26, 95, 180, 0.08);
-            padding: 12px;
-            border-radius: 20px;
-        }
-
-        .dashboard-panel .panel-header h2 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #0a2942;
-        }
-
-        .dashboard-panel .panel-header h2 span {
-            color: #1a5fb4;
-        }
-
-        .panel-section-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #406e96;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-section-title i {
-            font-size: 0.9rem;
-            color: #1a5fb4;
-        }
-
-        /* قائمة الإحصائيات */
-        .stats-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .stat-item {
-            background: white;
-            padding: 14px 16px;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            transition: 0.2s;
-        }
-
-        .stat-item:hover {
-            transform: translateX(-4px);
-            border-color: rgba(26, 95, 180, 0.2);
-        }
-
-        .stat-item .stat-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(26, 95, 180, 0.06);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1a5fb4;
-            font-size: 1.4rem;
-        }
-
-        .stat-item .stat-info {
-            flex: 1;
-        }
-
-        .stat-item .stat-info .stat-label {
-            font-size: 0.8rem;
-            color: #5a7f9a;
-            font-weight: 600;
-        }
-
-        .stat-item .stat-info .stat-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #0a2942;
-            line-height: 1.2;
-        }
-
-        .stat-item .stat-info .stat-value small {
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: #5a7f9a;
-        }
-
-        /* قائمة الإجراءات السريعة */
-        .quick-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .quick-actions button {
-            background: white;
-            border: 1px solid rgba(26, 95, 180, 0.08);
-            padding: 14px 16px;
-            border-radius: 30px;
-            font-weight: 600;
-            color: #1a2b3e;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: 'Cairo', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.01);
-        }
-
-        .quick-actions button i {
-            color: #1a5fb4;
-            width: 24px;
-            text-align: center;
-            font-size: 1.1rem;
-        }
-
-        .quick-actions button:hover {
-            background: #1a5fb4;
-            color: white;
-            border-color: #1a5fb4;
-            transform: scale(1.02);
-            box-shadow: 0 8px 16px rgba(26, 95, 180, 0.15);
-        }
-
-        .quick-actions button:hover i {
-            color: white;
-        }
-
-        .quick-actions button.danger:hover {
-            background: #c0392b;
-            border-color: #c0392b;
-        }
-
-        /* ===== بطاقة الحجز الرئيسية (تظل كما هي) ===== */
-        .booking-card {
-            flex: 2 1 600px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 48px;
-            box-shadow: 0 30px 60px rgba(0, 20, 40, 0.20), 0 15px 30px rgba(0, 0, 0, 0.05);
-            padding: 30px 35px 45px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-
-        @media (max-width: 900px) {
-            .app-wrapper {
-                flex-direction: column-reverse;
-                align-items: stretch;
-            }
-            .dashboard-panel {
-                max-width: 100%;
-                flex: 1 1 auto;
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 16px 30px;
-                padding: 20px 24px;
-                border-radius: 32px;
-            }
-            .dashboard-panel .panel-header {
-                width: 100%;
-                border-bottom: 2px dashed rgba(26, 95, 180, 0.10);
-                padding-bottom: 12px;
-                margin-bottom: 4px;
-            }
-            .stats-list {
-                flex-direction: row;
-                flex-wrap: wrap;
-                flex: 1 1 100%;
-            }
-            .stat-item {
-                flex: 1 1 160px;
-            }
-            .quick-actions {
-                flex-direction: row;
-                flex-wrap: wrap;
-                flex: 1 1 100%;
-            }
-            .quick-actions button {
-                flex: 1 1 140px;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .booking-card {
-                padding: 20px 18px 30px;
-                border-radius: 32px;
-            }
-            .dashboard-panel {
-                padding: 16px;
-                border-radius: 28px;
-            }
-            .stat-item {
-                flex: 1 1 120px;
-                padding: 12px;
-            }
-            .quick-actions button {
-                flex: 1 1 100%;
-            }
-        }
-
-        /* الهيدر (داخل بطاقة الحجز) */
-        .header {
+        /* ===== HEADER ===== */
+        .app-header {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 2px dashed rgba(0, 80, 200, 0.15);
-            padding-bottom: 20px;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: var(--transition);
         }
 
-        .header-title {
+        [data-theme="dark"] .app-header {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .header-brand {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .header-title i {
-            font-size: 2.6rem;
-            color: #1a5fb4;
-            background: rgba(26, 95, 180, 0.10);
-            padding: 12px;
-            border-radius: 30px;
-            box-shadow: 0 8px 12px rgba(26, 95, 180, 0.10);
+        .header-brand .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
         }
 
-        .header-title h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #0a2942;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
-        }
-
-        .header-title h1 span {
-            color: #1a5fb4;
-            background: linear-gradient(135deg, #1a5fb4, #3b8cff);
+        .header-brand h1 {
+            font-size: 1.6rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .badge-year {
-            background: #1a5fb4;
+        .header-brand h1 span {
+            -webkit-text-fill-color: var(--gray-600);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header-actions .year-badge {
+            background: var(--primary);
             color: white;
-            padding: 8px 20px;
+            padding: 6px 18px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 1.2rem;
-            box-shadow: 0 8px 14px rgba(26, 95, 180, 0.30);
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 8px;
-            letter-spacing: 0.5px;
         }
 
-        @media (max-width: 550px) {
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            .header-title h1 {
-                font-size: 1.6rem;
-            }
-            .badge-year {
-                font-size: 1rem;
-                padding: 6px 16px;
-            }
+        .header-actions .year-badge i {
+            font-size: 0.9rem;
         }
 
-        /* معلومات الطالب */
-        .student-info {
-            background: rgba(255, 255, 255, 0.5);
-            padding: 20px 25px;
-            border-radius: 28px;
-            margin-bottom: 35px;
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            transform: rotate(30deg);
+        }
+
+        /* ===== STUDENT PROFILE ===== */
+        .student-profile {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-lg);
+            padding: 20px 28px;
+            margin-bottom: 28px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 20px 30px;
-            box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
-            border: 1px solid rgba(255,255,255,0.8);
+            gap: 16px 32px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
         }
 
-        .student-info .info-item {
+        [data-theme="dark"] .student-profile {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .profile-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1a2b3e;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
         }
 
-        .student-info .info-item i {
-            color: #1a5fb4;
-            font-size: 1.3rem;
-            width: 28px;
+        .profile-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 28px;
+            flex: 1;
+        }
+
+        .profile-info .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.95rem;
+        }
+
+        .profile-info .info-item i {
+            color: var(--primary);
+            width: 20px;
             text-align: center;
         }
 
-        .student-info .info-item span {
+        .profile-info .info-item span {
             font-weight: 400;
-            color: #1f3a57;
-            background: white;
-            padding: 5px 16px;
-            border-radius: 40px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            color: var(--gray-600);
         }
 
-        .edit-profile-btn {
-            margin-right: auto;
-            background: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-            color: #1a5fb4;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-outline {
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: 2px solid var(--gray-200);
+            background: transparent;
+            font-weight: 700;
+            color: var(--gray-600);
             cursor: pointer;
-            transition: 0.2s;
+            transition: var(--transition);
             font-family: 'Cairo', sans-serif;
             display: flex;
             align-items: center;
             gap: 8px;
-            border: 1px solid rgba(26, 95, 180, 0.15);
+            font-size: 0.9rem;
         }
 
-        .edit-profile-btn:hover {
-            background: #1a5fb4;
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-bg);
+        }
+
+        /* ===== CONTROLS BAR ===== */
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 28px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            align-items: center;
+        }
+
+        [data-theme="dark"] .controls-bar {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 6px 16px;
+            border-radius: 50px;
+            border: none;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .filter-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
             color: white;
-            border-color: #1a5fb4;
-            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        @media (max-width: 650px) {
-            .student-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            .edit-profile-btn {
-                margin-right: 0;
-                width: 100%;
-                justify-content: center;
-            }
+        .sort-select {
+            padding: 6px 16px;
+            border-radius: 50px;
+            border: 2px solid var(--gray-200);
+            background: white;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-right: auto;
         }
 
-        /* شبكة المواد */
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        [data-theme="dark"] .sort-select {
+            background: var(--gray-800);
+            color: var(--gray-200);
+            border-color: var(--gray-600);
+        }
+
+        /* ===== SUBJECTS GRID ===== */
         .subjects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 22px;
-            margin: 30px 0 35px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 28px;
         }
 
+        /* ===== SUBJECT CARD ===== */
         .subject-card {
-            background: white;
-            border-radius: 28px;
-            padding: 22px 20px 20px;
-            box-shadow: 0 12px 24px rgba(0, 20, 40, 0.06);
-            transition: all 0.25s ease;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-lg);
+            padding: 24px 22px 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: var(--transition);
             position: relative;
-            cursor: default;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        [data-theme="dark"] .subject-card {
+            background: rgba(30, 41, 59, 0.85);
+            border-color: rgba(255, 255, 255, 0.05);
         }
 
         .subject-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 24px 40px rgba(26, 95, 180, 0.12);
-            border-color: rgba(26, 95, 180, 0.20);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-light);
         }
 
-        .subject-card .subject-icon {
-            font-size: 2.2rem;
-            color: #1a5fb4;
-            background: rgba(26, 95, 180, 0.06);
-            width: 60px;
-            height: 60px;
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .subject-card:hover::before {
+            opacity: 1;
+        }
+
+        .subject-card.booked-card::before {
+            opacity: 1;
+            background: linear-gradient(90deg, var(--success), #4ade80);
+        }
+
+        .subject-card .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .subject-card .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius);
+            background: var(--primary-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 20px;
-            margin-bottom: 12px;
+            font-size: 1.8rem;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .subject-card:hover .card-icon {
+            transform: scale(1.05) rotate(-5deg);
+        }
+
+        .subject-card .status-badge {
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.available {
+            background: var(--gray-100);
+            color: var(--gray-500);
+        }
+
+        .status-badge.booked {
+            background: var(--success-bg);
+            color: var(--success);
         }
 
         .subject-card h3 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #0a1e30;
-            margin-bottom: 6px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--gray-800);
+            margin-bottom: 4px;
         }
 
         .subject-card .subject-meta {
             display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: #406e96;
-            margin-bottom: 16px;
-            border-bottom: 1px solid #eaf0f5;
-            padding-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--gray-200);
         }
 
         .subject-card .subject-meta i {
-            margin-left: 6px;
+            margin-left: 4px;
+            color: var(--primary);
         }
 
         .subject-card .exam-date {
-            background: #f0f7fe;
-            padding: 10px 12px;
-            border-radius: 18px;
+            background: var(--primary-bg);
+            padding: 10px 14px;
+            border-radius: var(--radius);
             font-weight: 600;
-            color: #0f3b60;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            color: var(--gray-700);
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .subject-card .exam-date i {
-            color: #1a5fb4;
+            color: var(--primary);
         }
 
-        .btn-book {
-            background: linear-gradient(135deg, #1a5fb4, #2b7ae0);
+        .subject-card .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 50px;
             border: none;
-            padding: 14px 10px;
-            border-radius: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            cursor: pointer;
-            transition: 0.25s;
-            box-shadow: 0 10px 18px rgba(26, 95, 180, 0.25);
-            font-family: 'Cairo', sans-serif;
-            letter-spacing: 0.3px;
-            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
         }
 
-        .btn-book:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: scale(1.02);
-            box-shadow: 0 16px 28px rgba(26, 95, 180, 0.35);
-            background: linear-gradient(135deg, #134b9c, #1f6ad4);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
         }
 
-        .btn-book:active {
+        .btn-primary:active:not(:disabled) {
             transform: scale(0.97);
         }
 
-        .btn-book.booked {
-            background: #2b6f4b;
-            box-shadow: 0 8px 16px rgba(43, 111, 75, 0.25);
-            cursor: default;
-            opacity: 0.8;
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
-        .btn-book.booked i {
-            color: #b7e4c7;
+        .btn-primary.booked-btn {
+            background: linear-gradient(135deg, var(--success), #22c55e);
+            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
         }
 
-        .btn-book.booked:hover {
-            transform: none;
-            box-shadow: 0 8px 16px rgba(43, 111, 75, 0.25);
+        .btn-primary.booked-btn:hover:not(:disabled) {
+            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.4);
         }
 
-        .booked-badge {
-            display: inline-block;
-            background: #e6f4ee;
-            color: #1c6e47;
-            font-size: 0.75rem;
-            padding: 3px 14px;
-            border-radius: 40px;
-            font-weight: 700;
-            margin-right: 8px;
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--gray-200);
+            background: transparent;
+            color: var(--gray-400);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
-        /* ملخص الحجز */
-        .booking-summary {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border-radius: 40px;
-            padding: 20px 28px;
+        .btn-icon:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-bg);
+        }
+
+        .btn-icon:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* ===== SUMMARY BAR ===== */
+        .summary-bar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-lg);
+            padding: 18px 28px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            border: 1px solid rgba(255,255,255,0.8);
-            margin-top: 20px;
+            gap: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        [data-theme="dark"] .summary-bar {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(255, 255, 255, 0.05);
         }
 
         .summary-stats {
             display: flex;
-            align-items: center;
-            gap: 30px;
             flex-wrap: wrap;
+            gap: 20px 32px;
         }
 
-        .summary-stats div {
+        .summary-stats .stat {
             display: flex;
             align-items: center;
             gap: 10px;
             font-weight: 600;
-            color: #1a2b3e;
+            color: var(--gray-700);
         }
 
-        .summary-stats div i {
-            color: #1a5fb4;
-            font-size: 1.5rem;
-        }
-
-        .summary-stats div span {
-            background: white;
-            padding: 2px 18px;
-            border-radius: 40px;
-            font-weight: 700;
-            color: #0a2942;
-            font-size: 1.4rem;
-            min-width: 40px;
+        .summary-stats .stat i {
+            font-size: 1.3rem;
+            color: var(--primary);
+            width: 28px;
             text-align: center;
         }
 
-        .btn-reset {
-            background: rgba(0,0,0,0.02);
-            border: 1px solid #cddbe8;
+        .summary-stats .stat .stat-value {
+            background: var(--gray-100);
+            padding: 2px 16px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--gray-800);
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .summary-stats .stat .stat-value.booked-value {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .summary-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-danger {
             padding: 10px 24px;
-            border-radius: 60px;
-            font-weight: 600;
-            color: #1f405e;
+            border-radius: 50px;
+            border: none;
+            background: var(--danger-bg);
+            color: var(--danger);
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.2s;
+            transition: var(--transition);
             font-family: 'Cairo', sans-serif;
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1rem;
+            gap: 8px;
+            font-size: 0.95rem;
         }
 
-        .btn-reset:hover {
-            background: #1a5fb4;
-            border-color: #1a5fb4;
+        .btn-danger:hover {
+            background: var(--danger);
             color: white;
-            box-shadow: 0 8px 16px rgba(26, 95, 180, 0.15);
+            box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
         }
 
-        @media (max-width: 600px) {
-            .booking-summary {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 18px;
-            }
-            .summary-stats {
-                gap: 20px;
-                width: 100%;
-                justify-content: space-between;
-            }
-            .btn-reset {
-                width: 100%;
-                justify-content: center;
-            }
+        .btn-success-outline {
+            padding: 10px 24px;
+            border-radius: 50px;
+            border: 2px solid var(--success);
+            background: transparent;
+            color: var(--success);
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
         }
 
-        /* رسائل toast */
-        .toast-message {
+        .btn-success-outline:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
             position: fixed;
             bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) scale(0.9);
-            background: #1a2b3e;
+            right: 30px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .toast {
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            background: var(--gray-900);
             color: white;
-            padding: 16px 32px;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
-            z-index: 999;
+            box-shadow: var(--shadow-xl);
             display: flex;
             align-items: center;
             gap: 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transform: translateX(120%);
+            animation: slideIn 0.4s ease forwards;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .toast-message.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) scale(1);
+        .toast.success {
+            background: linear-gradient(135deg, #065f46, #047857);
         }
 
-        .toast-message i {
-            font-size: 1.6rem;
-            color: #7fc1ff;
+        .toast.error {
+            background: linear-gradient(135deg, #991b1b, #dc2626);
         }
 
-        .footer-note {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #406e96;
-            text-align: center;
-            border-top: 1px solid rgba(0,0,0,0.03);
-            padding-top: 18px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
+        .toast.warning {
+            background: linear-gradient(135deg, #92400e, #d97706);
         }
 
-        .footer-note i {
-            color: #1a5fb4;
+        .toast i {
+            font-size: 1.5rem;
+            flex-shrink: 0;
         }
 
-        /* تنسيق إضافي للوحة */
-        .badge-dashboard {
-            background: #1a5fb4;
+        .toast .toast-close {
+            margin-right: auto;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .toast .toast-close:hover {
             color: white;
-            border-radius: 40px;
-            padding: 2px 12px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            margin-right: 6px;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .subject-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+        .subject-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+        .subject-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+        .subject-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+        .subject-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+        .subject-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 12px 16px;
+            }
+
+            .header-brand h1 {
+                font-size: 1.2rem;
+            }
+
+            .student-profile {
+                padding: 16px 18px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .profile-avatar {
+                width: 48px;
+                height: 48px;
+                font-size: 1.4rem;
+                align-self: center;
+            }
+
+            .profile-info {
+                justify-content: center;
+                gap: 8px 16px;
+            }
+
+            .profile-info .info-item {
+                font-size: 0.85rem;
+            }
+
+            .profile-actions {
+                justify-content: center;
+            }
+
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sort-select {
+                margin-right: 0;
+                width: 100%;
+            }
+
+            .filter-group {
+                justify-content: center;
+            }
+
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding: 16px 18px;
+            }
+
+            .summary-stats {
+                justify-content: center;
+            }
+
+            .summary-actions {
+                justify-content: center;
+            }
+
+            .toast-container {
+                right: 16px;
+                left: 16px;
+                max-width: none;
+                bottom: 16px;
+            }
+
+            .toast {
+                font-size: 0.85rem;
+                padding: 14px 18px;
+            }
+
+            .header-actions .year-badge {
+                font-size: 0.75rem;
+                padding: 4px 12px;
+            }
+
+            .theme-toggle {
+                width: 38px;
+                height: 38px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 0;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .subject-card {
+                padding: 18px 16px;
+            }
+
+            .subject-card .card-actions {
+                flex-wrap: wrap;
+            }
+
+            .btn-primary {
+                font-size: 0.85rem;
+                padding: 10px 12px;
+            }
+
+            .btn-icon {
+                width: 38px;
+                height: 38px;
+            }
+
+            .summary-stats {
+                gap: 12px 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .summary-stats .stat {
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="app-wrapper">
-    <!-- ===== لوحة التحكم (الشريط الجانبي) ===== -->
-    <aside class="dashboard-panel" id="dashboardPanel">
-        <div class="panel-header">
-            <i class="fas fa-sliders-h"></i>
-            <h2>لوحة <span>التحكم</span></h2>
-        </div>
-
-        <!-- الإحصائيات -->
-        <div>
-            <div class="panel-section-title"><i class="fas fa-chart-pie"></i> إحصائيات سريعة</div>
-            <div class="stats-list">
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="fas fa-book-open"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-label">إجمالي المواد</div>
-                        <div class="stat-value" id="dashTotalSubjects">0</div>
-                    </div>
+    <div class="app-container">
+        <!-- ===== HEADER ===== -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-label">محجوز</div>
-                        <div class="stat-value" id="dashBookedCount">0 <small>/ 0</small></div>
-                    </div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-label">الطالب</div>
-                        <div class="stat-value" style="font-size: 1.1rem;">أحمد محمد</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- إجراءات سريعة -->
-        <div>
-            <div class="panel-section-title"><i class="fas fa-bolt"></i> إجراءات سريعة</div>
-            <div class="quick-actions">
-                <button id="dashAddSubject"><i class="fas fa-plus-circle"></i> إضافة مادة</button>
-                <button id="dashExport"><i class="fas fa-file-export"></i> تصدير الحجوزات</button>
-                <button id="dashReset" class="danger"><i class="fas fa-trash-alt"></i> إلغاء الكل</button>
-            </div>
-        </div>
-
-        <!-- معلومات إضافية -->
-        <div style="margin-top: auto; border-top: 1px solid rgba(0,0,0,0.04); padding-top: 16px; font-size: 0.8rem; color: #5a7f9a;">
-            <i class="fas fa-database"></i> آخر تحديث: <span id="dashTimestamp">الآن</span>
-        </div>
-    </aside>
-
-    <!-- ===== بطاقة الحجز الرئيسية ===== -->
-    <main class="booking-card" id="app">
-
-        <!-- الهيدر -->
-        <div class="header">
-            <div class="header-title">
-                <i class="fas fa-pen-to-square"></i>
                 <h1>حجز <span>الامتحانات</span></h1>
             </div>
-            <div class="badge-year">
-                <i class="fas fa-calendar-check"></i> 2026 · الثانوية
+            <div class="header-actions">
+                <div class="year-badge">
+                    <i class="fas fa-calendar-check"></i> 2026
+                </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ===== STUDENT PROFILE ===== -->
+        <div class="student-profile">
+            <div class="profile-avatar">أ</div>
+            <div class="profile-info">
+                <div class="info-item">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>أحمد محمد</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-id-card"></i>
+                    <span>٣ث / علمي</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-school"></i>
+                    <span>مدرسة النخبة</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <span>٠١٠٠٢٢٣٣٤٤٥</span>
+                </div>
+            </div>
+            <div class="profile-actions">
+                <button class="btn-outline" id="editProfileBtn">
+                    <i class="fas fa-user-pen"></i> تعديل الملف
+                </button>
             </div>
         </div>
 
-        <!-- معلومات الطالب -->
-        <div class="student-info">
-            <div class="info-item">
-                <i class="fas fa-user-graduate"></i>
-                <span>أحمد محمد</span>
+        <!-- ===== CONTROLS BAR ===== -->
+        <div class="controls-bar">
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">الكل</button>
+                <button class="filter-btn" data-filter="booked">محجوز</button>
+                <button class="filter-btn" data-filter="available">متاح</button>
             </div>
-            <div class="info-item">
-                <i class="fas fa-id-card"></i>
-                <span>٣ث / علمي</span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-school"></i>
-                <span>مدرسة النخبة</span>
-            </div>
-            <button class="edit-profile-btn" id="editProfileBtn"><i class="fas fa-user-pen"></i> تعديل الملف</button>
+            <select class="sort-select" id="sortSelect">
+                <option value="default">الترتيب الافتراضي</option>
+                <option value="name">ترتيب أبجدي</option>
+                <option value="date">حسب التاريخ</option>
+            </select>
         </div>
 
-        <!-- شبكة المواد -->
-        <div class="subjects-grid" id="subjectsContainer">
-            <!-- سيتم توليد المواد عبر JS -->
-        </div>
+        <!-- ===== SUBJECTS GRID ===== -->
+        <div class="subjects-grid" id="subjectsGrid"></div>
 
-        <!-- ملخص الحجز -->
-        <div class="booking-summary">
+        <!-- ===== SUMMARY BAR ===== -->
+        <div class="summary-bar">
             <div class="summary-stats">
-                <div>
+                <div class="stat">
                     <i class="fas fa-book-open"></i>
-                    <span id="totalSubjects">0</span> مادة
+                    <span>إجمالي المواد</span>
+                    <span class="stat-value" id="totalCount">0</span>
                 </div>
-                <div>
+                <div class="stat">
                     <i class="fas fa-check-circle"></i>
-                    <span id="bookedCount">0</span> محجوز
+                    <span>المحجوزة</span>
+                    <span class="stat-value booked-value" id="bookedCount">0</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-clock"></i>
+                    <span>المتبقية</span>
+                    <span class="stat-value" id="remainingCount">0</span>
                 </div>
             </div>
-            <button class="btn-reset" id="resetBookingsBtn"><i class="fas fa-rotate-right"></i> إلغاء الكل</button>
+            <div class="summary-actions">
+                <button class="btn-success-outline" id="saveBookingsBtn">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+                <button class="btn-danger" id="resetBookingsBtn">
+                    <i class="fas fa-trash-can"></i> إلغاء الكل
+                </button>
+            </div>
         </div>
+    </div>
 
-        <!-- تذييل -->
-        <div class="footer-note">
-            <i class="fas fa-shield-alt"></i> بيانات آمنة · تحديث فوري
-            <i class="fas fa-circle" style="font-size: 0.4rem; color: #b0c9df; align-self: center;"></i>
-            <span>⚡ نظام حجز متقدم</span>
-        </div>
-    </main>
-</div>
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div class="toast-container" id="toastContainer"></div>
 
-<!-- رسالة توست -->
-<div id="toastMessage" class="toast-message">
-    <i class="fas fa-circle-check"></i>
-    <span id="toastText">تم الحجز بنجاح</span>
-</div>
+    <script>
+        (function() {
+            'use strict';
 
-<script>
-    (function() {
-        "use strict";
+            // ========================================
+            // DATA
+            // ========================================
+            const subjectsData = [
+                { id: 1, name: 'اللغة العربية', icon: 'fa-book', date: '2026-06-15', time: '09:00 ص' },
+                { id: 2, name: 'اللغة الإنجليزية', icon: 'fa-language', date: '2026-06-17', time: '11:00 ص' },
+                { id: 3, name: 'الرياضيات', icon: 'fa-calculator', date: '2026-06-19', time: '09:00 ص' },
+                { id: 4, name: 'الفيزياء', icon: 'fa-flask', date: '2026-06-21', time: '10:00 ص' },
+                { id: 5, name: 'الكيمياء', icon: 'fa-vial', date: '2026-06-23', time: '09:00 ص' },
+                { id: 6, name: 'الأحياء', icon: 'fa-dna', date: '2026-06-25', time: '11:00 ص' },
+            ];
 
-        // ---------- بيانات المواد (ثابتة) ----------
-        const subjectsData = [
-            { id: 1, name: "اللغة العربية", icon: "fa-book", date: "2026-06-15", time: "09:00 ص" },
-            { id: 2, name: "اللغة الإنجليزية", icon: "fa-language", date: "2026-06-17", time: "11:00 ص" },
-            { id: 3, name: "الرياضيات", icon: "fa-calculator", date: "2026-06-19", time: "09:00 ص" },
-            { id: 4, name: "الفيزياء", icon: "fa-flask", date: "2026-06-21", time: "10:00 ص" },
-            { id: 5, name: "الكيمياء", icon: "fa-vial", date: "2026-06-23", time: "09:00 ص" },
-            { id: 6, name: "الأحياء", icon: "fa-dna", date: "2026-06-25", time: "11:00 ص" },
-        ];
+            // ========================================
+            // STATE
+            // ========================================
+            let bookings = new Array(subjectsData.length).fill(false);
+            let currentFilter = 'all';
+            let currentSort = 'default';
 
-        // ---------- الحالة (state) ----------
-        let bookings = new Array(subjectsData.length).fill(false);   // true = محجوز
+            // ========================================
+            // DOM REFS
+            // ========================================
+            const grid = document.getElementById('subjectsGrid');
+            const totalCountEl = document.getElementById('totalCount');
+            const bookedCountEl = document.getElementById('bookedCount');
+            const remainingCountEl = document.getElementById('remainingCount');
+            const resetBtn = document.getElementById('resetBookingsBtn');
+            const saveBtn = document.getElementById('saveBookingsBtn');
+            const editBtn = document.getElementById('editProfileBtn');
+            const themeToggle = document.getElementById('themeToggle');
+            const toastContainer = document.getElementById('toastContainer');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const sortSelect = document.getElementById('sortSelect');
 
-        // عناصر DOM الرئيسية
-        const subjectsContainer = document.getElementById('subjectsContainer');
-        const totalSubjectsSpan = document.getElementById('totalSubjects');
-        const bookedCountSpan = document.getElementById('bookedCount');
-        const resetBtn = document.getElementById('resetBookingsBtn');
-        const editProfileBtn = document.getElementById('editProfileBtn');
-        const toastEl = document.getElementById('toastMessage');
-        const toastText = document.getElementById('toastText');
+            // ========================================
+            // THEME
+            // ========================================
+            function getPreferredTheme() {
+                if (localStorage.getItem('theme')) {
+                    return localStorage.getItem('theme');
+                }
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
 
-        // عناصر لوحة التحكم
-        const dashTotal = document.getElementById('dashTotalSubjects');
-        const dashBooked = document.getElementById('dashBookedCount');
-        const dashTimestamp = document.getElementById('dashTimestamp');
-        const dashAddBtn = document.getElementById('dashAddSubject');
-        const dashExportBtn = document.getElementById('dashExport');
-        const dashResetBtn = document.getElementById('dashReset');
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                const icon = themeToggle.querySelector('i');
+                if (theme === 'dark') {
+                    icon.className = 'fas fa-sun';
+                } else {
+                    icon.className = 'fas fa-moon';
+                }
+            }
 
-        let toastTimeout = null;
+            function toggleTheme() {
+                const current = document.documentElement.getAttribute('data-theme');
+                setTheme(current === 'dark' ? 'light' : 'dark');
+            }
 
-        // ---------- وظائف مساعدة ----------
-        function showToast(message, isSuccess = true) {
-            toastText.textContent = message;
-            toastEl.querySelector('i').className = isSuccess ? 'fas fa-circle-check' : 'fas fa-circle-exclamation';
-            toastEl.classList.add('show');
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toastEl.classList.remove('show');
-            }, 3000);
-        }
+            // ========================================
+            // TOAST
+            // ========================================
+            function showToast(message, type = 'success', duration = 3000) {
+                const icons = {
+                    success: 'fa-circle-check',
+                    error: 'fa-circle-xmark',
+                    warning: 'fa-triangle-exclamation'
+                };
 
-        // تحديث جميع العدادات (البطاقة الرئيسية + لوحة التحكم)
-        function updateAllCounters() {
-            const total = subjectsData.length;
-            const booked = bookings.filter(v => v === true).length;
-            
-            // البطاقة الرئيسية
-            totalSubjectsSpan.textContent = total;
-            bookedCountSpan.textContent = booked;
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <i class="fas ${icons[type] || icons.success}"></i>
+                    <span>${message}</span>
+                    <button class="toast-close"><i class="fas fa-xmark"></i></button>
+                `;
 
-            // لوحة التحكم
-            dashTotal.textContent = total;
-            dashBooked.innerHTML = `${booked} <small>/ ${total}</small>`;
-            
-            // تحديث الطابع الزمني
-            const now = new Date();
-            dashTimestamp.textContent = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-        }
+                toastContainer.appendChild(toast);
 
-        // إعادة عرض البطاقات (render)
-        function renderSubjects() {
-            let html = '';
-            for (let i = 0; i < subjectsData.length; i++) {
-                const subj = subjectsData[i];
-                const isBooked = bookings[i];
-                const dateObj = new Date(subj.date + 'T00:00:00');
-                const formattedDate = dateObj.toLocaleDateString('ar-EG', { 
-                    year: 'numeric', month: 'long', day: 'numeric' 
+                const closeBtn = toast.querySelector('.toast-close');
+                closeBtn.addEventListener('click', () => {
+                    toast.remove();
                 });
 
-                html += `
-                    <div class="subject-card" data-index="${i}">
-                        <div class="subject-icon">
-                            <i class="fas ${subj.icon}"></i>
-                        </div>
-                        <h3>${subj.name}</h3>
-                        <div class="subject-meta">
-                            <span><i class="fas fa-calendar-day"></i> ${formattedDate}</span>
-                            <span><i class="fas fa-clock"></i> ${subj.time}</span>
-                        </div>
-                        <div class="exam-date">
-                            <i class="fas fa-stopwatch"></i> الامتحان: ${formattedDate} · ${subj.time}
-                        </div>
-                        <button class="btn-book ${isBooked ? 'booked' : ''}" data-index="${i}">
-                            ${isBooked ? '<i class="fas fa-check-circle"></i> تم الحجز' : '<i class="fas fa-pen"></i> احجز الآن'}
-                            ${isBooked ? '<span class="booked-badge">مؤكد</span>' : ''}
-                        </button>
-                    </div>
-                `;
-            }
-            subjectsContainer.innerHTML = html;
-            updateAllCounters();
-
-            // إعادة ربط الأحداث للأزرار
-            document.querySelectorAll('.btn-book').forEach(btn => {
-                btn.addEventListener('click', handleBookingToggle);
-            });
-        }
-
-        // معالج الضغط على زر الحجز
-        function handleBookingToggle(e) {
-            const btn = e.currentTarget;
-            const index = parseInt(btn.getAttribute('data-index'), 10);
-            if (isNaN(index)) return;
-
-            if (bookings[index] === true) {
-                showToast('❗ هذا الامتحان محجوز مسبقاً', false);
-                return;
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.style.transform = 'translateX(120%)';
+                        toast.style.opacity = '0';
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, duration);
             }
 
-            bookings[index] = true;
-            renderSubjects();
-            const subjectName = subjectsData[index].name;
-            showToast(`✅ تم حجز ${subjectName} بنجاح`, true);
-        }
+            // ========================================
+            // RENDER
+            // ========================================
+            function getFilteredData() {
+                let data = subjectsData.map((subj, index) => ({ ...subj, index, booked: bookings[index] }));
 
-        // إعادة ضبط جميع الحجوزات (من البطاقة أو لوحة التحكم)
-        function resetAllBookings() {
-            if (bookings.every(v => v === false)) {
-                showToast('📭 لا توجد حجوزات لإلغائها', false);
-                return;
+                // Filter
+                if (currentFilter === 'booked') {
+                    data = data.filter(item => item.booked);
+                } else if (currentFilter === 'available') {
+                    data = data.filter(item => !item.booked);
+                }
+
+                // Sort
+                if (currentSort === 'name') {
+                    data.sort((a, b) => a.name.localeCompare(b.name));
+                } else if (currentSort === 'date') {
+                    data.sort((a, b) => new Date(a.date) - new Date(b.date));
+                }
+
+                return data;
             }
-            bookings.fill(false);
-            renderSubjects();
-            showToast('🔄 تم إلغاء جميع الحجوزات', true);
-        }
 
-        // -------- محاكاة إضافة مادة (لوحة التحكم) --------
-        function handleAddSubject() {
-            const newSubject = {
-                id: Date.now(),
-                name: `مادة جديدة ${subjectsData.length + 1}`,
-                icon: "fa-star",
-                date: "2026-07-01",
-                time: "10:00 ص"
-            };
-            subjectsData.push(newSubject);
-            bookings.push(false);
-            renderSubjects();
-            showToast(`➕ تم إضافة "${newSubject.name}"`, true);
-        }
+            function render() {
+                const data = getFilteredData();
+                const total = subjectsData.length;
+                const booked = bookings.filter(v => v).length;
+                const remaining = total - booked;
 
-        // -------- محاكاة تصدير الحجوزات --------
-        function handleExport() {
-            const bookedNames = subjectsData
-                .filter((_, idx) => bookings[idx] === true)
-                .map(s => s.name)
-                .join('، ');
-            if (bookedNames.length === 0) {
-                showToast('
+                // Update stats
+                totalCountEl.textContent = total;
+                bookedCountEl.textContent = booked;
+                remainingCountEl.textContent = remaining;
+
+                // Render grid
+                if (data.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--gray-500);">
+                            <i class="fas fa-inbox" style="font-size:3rem; margin-bottom:16px; display:block;"></i>
+                            <p style="font-size:1.2rem; font-weight:600;">لا توجد مواد ${currentFilter === 'booked' ? 'محجوزة' : currentFilter === 'available' ? 'متاحة' : ''}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                data.forEach((item) => {
+                    const isBooked = item.booked;
+                    const dateObj = new Date(item.date + 'T00:00:00');
+                    const formattedDate = dateObj.toLocaleDateString('ar-EG', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+
+                    html += `
+                        <div class="subject-card ${isBooked ? 'booked-card' : ''}" style="animation-delay:0.1s;">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <i class="fas ${item.icon}"></i>
+                                </div>
+                                <span class="status-badge ${isBooked ? 'booked' : 'available'}">
+                                    ${isBooked ? 'محجوز ✓' : 'متاح'}
+                                </span>
+                            </div>
+                            <h3>${item.name}</h3>
+                            <div class="subject-meta">
+                                <span><i class="fas fa-calendar-day"></i> ${formattedDate}</span>
+                                <span><i class="fas fa-clock"></i> ${item.time}</span>
+                            </div>
+                            <div class="exam-date">
+                                <i class="fas fa-stopwatch"></i> الامتحان: ${formattedDate} · ${item.time}
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-primary ${isBooked ? 'booked-btn' : ''}" data-index="${item.index}" ${isBooked ? 'disabled' : ''}>
+                                    ${isBooked ? '<i class="fas fa-check-circle"></i> تم الحجز' : '<i class="fas fa-pen"></i> احجز الآن'}
+                                </button>
+                                ${isBooked ? `
+                                    <button class="btn-icon" data-index="${item.index}" data-action="cancel">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                grid.innerHTML = html;
+
+                // Attach event listeners
+                document.querySelectorAll('.btn-primary:not(:disabled)').forEach(btn => {
+                    btn.addEventListener('click', handleBook);
+                });
+
+                document.querySelectorAll('.btn-icon[data-action="cancel"]').forEach(btn => {
+                    btn.addEventListener('click', handleCancel);
+                });
+            }
+
+            // ========================================
+            // EVENT HANDLERS
+            // ========================================
+            function handleBook(e) {
+                const btn = e.currentTarget;
+                const index = parseInt(btn.dataset.index, 10);
+                if (isNaN(index) || bookings[index]) return;
+
+                bookings[index] = true;
+                render();
+                showToast(`✅ تم حجز ${subjectsData[index].name} بنجاح`, 'success');
+            }
+
+            function handleCancel(e) {
+                const btn = e.currentTarget;
+                const index = parseInt(btn.dataset.index, 10);
+                if (isNaN(index) || !bookings[index]) return;
+
+                bookings[index] = false;
+                render();
+                showToast(`❌ تم إلغاء حجز ${subjectsData[index].name}`, 'warning');
+            }
+
+            function resetAllBookings() {
+                if (bookings.every(v => !v)) {
+                    showToast('📭 لا توجد حجوزات لإلغائها', 'warning');
+                    return;
+                }
+
+                if (confirm('⚠️ هل أنت متأكد من إلغاء جميع الحجوزات؟')) {
+                    bookings.fill(false);
+                    render();
+                    showToast('🔄 تم إلغاء جميع الحجوزات', 'success');
+                }
+            }
+
+            function saveBookings() {
+                const bookedNames = subjectsData
+                    .filter((_, idx) => bookings[idx])
+                    .map(s => s.name);
+
+                if (bookedNames.length === 0) {
+                    showToast('📭 لا توجد حجوزات لحفظها', 'warning');
+                    return;
+                }
+
+                // Simulate save
+                showToast(`💾 تم حفظ ${bookedNames.length} حجز بنجاح`, 'success');
+                console.log('Saved bookings:', bookedNames);
+            }
+
+            function handleEditProfile() {
+                showToast('✏️ فتح صفحة تعديل الملف الشخصي', 'warning');
+            }
+
+            // ========================================
+            // FILTER & SORT
+            // ========================================
+            function setFilter(filter) {
+                currentFilter = filter;
+                filterBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.filter === filter);
+                });
+                render();
+            }
+
+            function setSort(sort) {
+                currentSort = sort;
+                render();
+            }
+
+            // ========================================
+            // INIT
+            // ========================================
+            function init() {
+                // Theme
+                setTheme(getPreferredTheme());
+                themeToggle.addEventListener('click', toggleTheme);
+
+                // Filter
+                filterBtns.forEach(btn => {
+                    btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+                });
+
+                // Sort
+                sortSelect.addEventListener('change', (e) => setSort(e.target.value));
+
+                // Actions
+                resetBtn.addEventListener('click', resetAllBookings);
+                saveBtn.addEventListener('click', saveBookings);
+                editBtn.addEventListener('click', handleEditProfile);
+
+                // Initial render
+                render();
+            }
+
+            // Start
+            init();
+
+        })();
+    </script>
+
+</body>
+    </html>
