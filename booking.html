@@ -346,6 +346,8 @@
             background: #fffbeb;
             color: #f59e0b;
         }
+
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -380,6 +382,60 @@
         .toast i {
             font-size: 1.5rem;
         }
+        .toast .close-toast {
+            margin-right: auto;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .toast .close-toast:hover {
+            color: white;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .loading-spinner {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .loading-spinner .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loading-spinner p {
+            color: #334155;
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
             .app-header {
                 padding: 12px 16px;
@@ -421,7 +477,17 @@
     </style>
 </head>
 <body>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>جاري تحميل المواد...</p>
+        </div>
+    </div>
+
     <div class="app-container">
+        <!-- Header -->
         <header class="app-header">
             <div class="header-brand">
                 <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
@@ -434,6 +500,7 @@
             </div>
         </header>
 
+        <!-- Student Profile -->
         <div class="student-profile">
             <div class="profile-avatar" id="profileAvatar">أ</div>
             <div class="profile-info">
@@ -444,8 +511,15 @@
             </div>
         </div>
 
-        <div class="subjects-grid" id="subjectsGrid"></div>
+        <!-- Subjects Grid -->
+        <div class="subjects-grid" id="subjectsGrid">
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:#94a3b8;">
+                <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                <p style="margin-top:12px;">جاري تحميل المواد...</p>
+            </div>
+        </div>
 
+        <!-- Summary -->
         <div class="summary-bar">
             <div class="summary-stats">
                 <div class="stat"><i class="fas fa-book-open"></i> <span>إجمالي</span> <span class="stat-value" id="totalCount">0</span></div>
@@ -456,12 +530,17 @@
         </div>
     </div>
 
+    <!-- Toast -->
     <div class="toast" id="toast">
-        <i class="fas fa-circle-check"></i>
+        <i class="fas fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage">تم الحجز بنجاح</span>
+        <button class="close-toast" onclick="closeToast()"><i class="fas fa-times"></i></button>
     </div>
 
     <script>
+        // ============================================
+        // FIREBASE CONFIG
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyB0p0us6BuzD2ngzjhRnmUIhlOcBeRp0vQ",
             authDomain: "tok-tak-d6e17.firebaseapp.com",
@@ -472,10 +551,13 @@
             appId: "1:547062578826:web:aa285cf798341be07cb773"
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const database = firebase.database();
 
+        // ============================================
+        // DATA
+        // ============================================
         const subjectsData = [
             { id: 1, name: 'اللغة العربية', icon: 'fa-book', date: '2026-06-15', time: '09:00 ص', price: 150 },
             { id: 2, name: 'اللغة الإنجليزية', icon: 'fa-language', date: '2026-06-17', time: '11:00 ص', price: 150 },
@@ -485,48 +567,71 @@
             { id: 6, name: 'الأحياء', icon: 'fa-dna', date: '2026-06-25', time: '11:00 ص', price: 150 },
         ];
 
-        let bookingsData = [];
+        // ============================================
+        // STATE
+        // ============================================
         let currentUser = null;
+        let bookingsData = [];
+        let isLoading = true;
 
+        // ============================================
+        // DOM REFS
+        // ============================================
+        const grid = document.getElementById('subjectsGrid');
+        const totalCountEl = document.getElementById('totalCount');
+        const bookedCountEl = document.getElementById('bookedCount');
+        const remainingCountEl = document.getElementById('remainingCount');
+        const pendingCountEl = document.getElementById('pendingCount');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
         let toastTimeout;
 
+        // ============================================
+        // TOAST
+        // ============================================
         function showToast(message, type = 'success') {
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-xmark',
+                warning: 'fa-triangle-exclamation'
+            };
             toast.className = `toast ${type}`;
+            toastIcon.className = `fas ${icons[type] || icons.success}`;
             toastMessage.textContent = message;
             toast.classList.add('show');
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('userName').textContent = `مرحباً، ${user.displayName || 'طالب'}`;
-                document.getElementById('profileAvatar').textContent = (user.displayName || 'طالب')[0];
-                document.getElementById('studentName').textContent = user.displayName || 'أحمد محمد';
-                loadUserProfile(user.uid);
-                loadBookings(user.uid);
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-
-        function loadUserProfile(uid) {
-            database.ref(`users/${uid}`).once('value').then(snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    document.getElementById('studentName').textContent = data.name || 'أحمد محمد';
-                    document.getElementById('studentClass').textContent = data.class || '٣ث / علمي';
-                    document.getElementById('studentSchool').textContent = data.school || 'مدرسة النخبة';
-                    document.getElementById('studentPhone').textContent = data.phone || '٠١٠٠٢٢٣٣٤٤٥';
-                }
-            });
+        function closeToast() {
+            toast.classList.remove('show');
+            clearTimeout(toastTimeout);
         }
 
-        function loadBookings(uid) {
-            database.ref(`bookings/${uid}`).on('value', snapshot => {
+        // ============================================
+        // SESSION MANAGEMENT
+        // ============================================
+        function getSession() {
+            const session = localStorage.getItem('exam_session');
+            return session ? JSON.parse(session) : null;
+        }
+
+        function logout() {
+            localStorage.removeItem('exam_session');
+            window.location.href = 'login.html';
+        }
+
+        // ============================================
+        // LOAD BOOKINGS FROM FIREBASE
+        // ============================================
+        function loadBookings(userEmail) {
+            const userKey = userEmail.replace(/[.#$\/\[\]]/g, '_');
+            const bookingsRef = database.ref(`bookings/${userKey}`);
+
+            bookingsRef.on('value', snapshot => {
                 const data = snapshot.val();
                 bookingsData = [];
                 if (data) {
@@ -535,25 +640,59 @@
                     });
                 }
                 renderSubjects();
+                isLoading = false;
+                loadingOverlay.classList.remove('active');
+            }, error => {
+                console.error('Error loading bookings:', error);
+                showToast('⚠️ خطأ في تحميل الحجوزات', 'error');
+                isLoading = false;
+                loadingOverlay.classList.remove('active');
+                // Load from localStorage as fallback
+                loadBookingsFromLocal();
             });
         }
 
+        // ============================================
+        // LOCAL FALLBACK
+        // ============================================
+        function loadBookingsFromLocal() {
+            const local = localStorage.getItem('bookings_local');
+            if (local) {
+                bookingsData = JSON.parse(local);
+            }
+            renderSubjects();
+        }
+
+        function saveBookingsLocal() {
+            localStorage.setItem('bookings_local', JSON.stringify(bookingsData));
+        }
+
+        // ============================================
+        // GET BOOKING STATUS
+        // ============================================
         function getBookingStatus(subjectId) {
             const booking = bookingsData.find(b => b.subjectId === subjectId);
             if (!booking) return 'available';
             return booking.status || 'pending';
         }
 
+        function getBooking(subjectId) {
+            return bookingsData.find(b => b.subjectId === subjectId);
+        }
+
+        // ============================================
+        // RENDER SUBJECTS
+        // ============================================
         function renderSubjects() {
             const total = subjectsData.length;
             const booked = bookingsData.filter(b => b.status === 'approved').length;
             const pending = bookingsData.filter(b => b.status === 'pending').length;
             const remaining = total - booked - pending;
 
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('bookedCount').textContent = booked;
-            document.getElementById('remainingCount').textContent = remaining;
-            document.getElementById('pendingCount').textContent = pending;
+            totalCountEl.textContent = total;
+            bookedCountEl.textContent = booked;
+            remainingCountEl.textContent = remaining;
+            pendingCountEl.textContent = pending;
 
             let html = '';
             subjectsData.forEach((subj, index) => {
@@ -608,11 +747,16 @@
                 `;
             });
 
-            document.getElementById('subjectsGrid').innerHTML = html;
+            grid.innerHTML = html;
+            saveBookingsLocal();
         }
 
+        // ============================================
+        // BOOK SUBJECT
+        // ============================================
         function bookSubject(subjectId) {
-            if (!currentUser) {
+            const session = getSession();
+            if (!session) {
                 showToast('⚠️ الرجاء تسجيل الدخول أولاً', 'error');
                 return;
             }
@@ -620,9 +764,21 @@
             const subject = subjectsData.find(s => s.id === subjectId);
             if (!subject) return;
 
+            const existing = getBooking(subjectId);
+            if (existing && existing.status === 'pending') {
+                showToast('⏳ هذا الطلب قيد المراجعة', 'warning');
+                return;
+            }
+            if (existing && existing.status === 'approved') {
+                showToast('✅ هذا الامتحان محجوز بالفعل', 'warning');
+                return;
+            }
+
             if (confirm(`هل أنت متأكد من حجز "${subject.name}"؟\nالمبلغ: ${subject.price} ج.م`)) {
-                const bookingRef = database.ref(`bookings/${currentUser.uid}`).push();
-                bookingRef.set({
+                const userKey = session.email.replace(/[.#$\/\[\]]/g, '_');
+                const bookingRef = database.ref(`bookings/${userKey}`).push();
+
+                const bookingData = {
                     subjectId: subject.id,
                     subjectName: subject.name,
                     date: subject.date,
@@ -630,26 +786,68 @@
                     price: subject.price,
                     status: 'pending',
                     createdAt: Date.now(),
-                    studentName: document.getElementById('studentName').textContent
-                }).then(() => {
-                    showToast(`⏳ تم إرسال طلب حجز "${subject.name}" للمراجعة`, 'warning');
-                    showToast('💳 يرجى التوجه إلى صفحة الدفع لإكمال العملية', 'warning');
-                    setTimeout(() => {
-                        window.location.href = 'payment.html';
-                    }, 2000);
-                }).catch(err => {
-                    showToast('❌ حدث خطأ في الحجز', 'error');
-                });
+                    studentName: session.name || 'طالب'
+                };
+
+                bookingRef.set(bookingData)
+                    .then(() => {
+                        showToast(`⏳ تم إرسال طلب حجز "${subject.name}" للمراجعة`, 'warning');
+                        showToast('💳 يرجى التوجه إلى صفحة الدفع لإكمال العملية', 'warning');
+                        setTimeout(() => {
+                            window.location.href = 'payment.html';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Error booking:', err);
+                        showToast('❌ حدث خطأ في الحجز', 'error');
+                        // Save locally as fallback
+                        bookingData.id = 'local_' + Date.now();
+                        bookingsData.push(bookingData);
+                        renderSubjects();
+                    });
             }
         }
 
-        function logout() {
-            auth.signOut().then(() => {
+        // ============================================
+        // INIT
+        // ============================================
+        function init() {
+            // Show loading
+            loadingOverlay.classList.add('active');
+
+            // Get session
+            const session = getSession();
+            if (!session) {
                 window.location.href = 'login.html';
-            });
+                return;
+            }
+
+            currentUser = session;
+
+            // Update UI
+            document.getElementById('userName').textContent = `مرحباً، ${session.name || 'طالب'}`;
+            document.getElementById('profileAvatar').textContent = (session.name || 'طالب')[0];
+            document.getElementById('studentName').textContent = session.name || 'أحمد محمد';
+            document.getElementById('studentClass').textContent = session.class || '٣ث / علمي';
+            document.getElementById('studentSchool').textContent = session.school || 'مدرسة النخبة';
+            document.getElementById('studentPhone').textContent = session.phone || '٠١٠٠٢٢٣٣٤٤٥';
+
+            // Load bookings from Firebase
+            loadBookings(session.email);
+
+            console.log('✅ تم تحميل صفحة الحجز');
+            console.log(`👤 المستخدم: ${session.email}`);
+            console.log(`📚 عدد المواد: ${subjectsData.length}`);
         }
 
-        renderSubjects();
+        // Start
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Make functions global
+        window.bookSubject = bookSubject;
+        window.logout = logout;
+        window.showToast = showToast;
+        window.closeToast = closeToast;
     </script>
 </body>
-  </html>
+    </html>
