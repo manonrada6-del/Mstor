@@ -2,1168 +2,330 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>حجز امتحانات الثانوية العامة | منصة متكاملة</title>
-    <!-- Font Awesome 6 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | منصة حجز الامتحانات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: #60a5fa;
-            --primary-bg: #eff6ff;
-            --success: #16a34a;
-            --success-bg: #f0fdf4;
-            --danger: #dc2626;
-            --danger-bg: #fef2f2;
-            --warning: #f59e0b;
-            --warning-bg: #fffbeb;
-            --gray-50: #f8fafc;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-400: #94a3b8;
-            --gray-500: #64748b;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --gray-800: #1e293b;
-            --gray-900: #0f172a;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            --radius: 1rem;
-            --radius-lg: 1.5rem;
-            --radius-xl: 2rem;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        [data-theme="dark"] {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --primary-light: #93bbfc;
-            --primary-bg: #1e293b;
-            --gray-50: #0f172a;
-            --gray-100: #1e293b;
-            --gray-200: #334155;
-            --gray-300: #475569;
-            --gray-400: #94a3b8;
-            --gray-500: #cbd5e1;
-            --gray-600: #e2e8f0;
-            --gray-700: #f1f5f9;
-            --gray-800: #f8fafc;
-            --gray-900: #ffffff;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
-            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            --warning-bg: #422006;
-        }
-
         body {
             font-family: 'Cairo', sans-serif;
-            background: var(--gray-50);
-            color: var(--gray-800);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
-            transition: var(--transition);
         }
-
-        .app-container {
-            max-width: 1200px;
+        .login-container {
             width: 100%;
-            margin: 0 auto;
+            max-width: 420px;
+            animation: fadeInUp 0.6s ease;
         }
-
-        /* ===== HEADER ===== */
-        .app-header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 32px;
-            padding: 16px 24px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: var(--transition);
-        }
-
-        [data-theme="dark"] .app-header {
-            background: rgba(30, 41, 59, 0.9);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header-brand .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: var(--radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
-        }
-
-        .header-brand h1 {
-            font-size: 1.6rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header-brand h1 span {
-            -webkit-text-fill-color: var(--gray-600);
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .header-actions .user-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 16px 6px 20px;
-            background: var(--primary-bg);
-            border-radius: 50px;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .header-actions .user-badge i {
-            font-size: 1rem;
-        }
-
-        .theme-toggle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: none;
-            background: var(--gray-100);
-            color: var(--gray-600);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .theme-toggle:hover {
-            background: var(--primary);
-            color: white;
-            transform: rotate(30deg);
-        }
-
-        .btn-logout {
-            padding: 8px 20px;
-            border-radius: 50px;
-            border: 2px solid var(--danger);
-            background: transparent;
-            color: var(--danger);
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Cairo', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-
-        .btn-logout:hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        /* ===== TABS ===== */
-        .tabs-container {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(8px);
-            padding: 8px 12px;
-            border-radius: var(--radius);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        [data-theme="dark"] .tabs-container {
-            background: rgba(30, 41, 59, 0.5);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .tab-btn {
-            padding: 10px 24px;
-            border-radius: var(--radius);
-            border: none;
-            background: transparent;
-            color: var(--gray-600);
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Cairo', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tab-btn:hover {
-            background: var(--gray-200);
-            color: var(--gray-800);
-        }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .tab-btn i {
-            font-size: 1rem;
-        }
-
-        /* ===== TAB CONTENT ===== */
-        .tab-content {
-            display: none;
-            animation: fadeInUp 0.4s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
-        /* ===== STUDENT PROFILE ===== */
-        .student-profile {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: var(--radius-lg);
-            padding: 20px 28px;
-            margin-bottom: 28px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 16px 32px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 40px 35px 45px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
-
-        [data-theme="dark"] .student-profile {
-            background: rgba(30, 41, 59, 0.7);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .profile-avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.8rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .profile-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 28px;
-            flex: 1;
-        }
-
-        .profile-info .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: var(--gray-700);
-            font-size: 0.95rem;
-        }
-
-        .profile-info .info-item i {
-            color: var(--primary);
-            width: 20px;
+        .login-logo {
             text-align: center;
+            margin-bottom: 35px;
         }
-
-        .profile-info .info-item span {
-            font-weight: 400;
-            color: var(--gray-600);
-        }
-
-        /* ===== SUBJECTS GRID ===== */
-        .subjects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 28px;
-        }
-
-        /* ===== SUBJECT CARD ===== */
-        .subject-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: var(--radius-lg);
-            padding: 24px 22px 22px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.5s ease forwards;
-            opacity: 0;
-        }
-
-        [data-theme="dark"] .subject-card {
-            background: rgba(30, 41, 59, 0.85);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .subject-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--primary-light);
-        }
-
-        .subject-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .subject-card:hover::before {
-            opacity: 1;
-        }
-
-        .subject-card.booked-card::before {
-            opacity: 1;
-            background: linear-gradient(90deg, var(--success), #4ade80);
-        }
-
-        .subject-card.pending-card::before {
-            opacity: 1;
-            background: linear-gradient(90deg, var(--warning), #fbbf24);
-        }
-
-        .subject-card .card-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-
-        .subject-card .card-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--radius);
-            background: var(--primary-bg);
+        .login-logo .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
-            color: var(--primary);
-            transition: var(--transition);
-        }
-
-        .subject-card:hover .card-icon {
-            transform: scale(1.05) rotate(-5deg);
-        }
-
-        .subject-card .status-badge {
-            padding: 4px 14px;
-            border-radius: 50px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-badge.available {
-            background: var(--gray-100);
-            color: var(--gray-500);
-        }
-
-        .status-badge.booked {
-            background: var(--success-bg);
-            color: var(--success);
-        }
-
-        .status-badge.pending {
-            background: var(--warning-bg);
-            color: var(--warning);
-        }
-
-        .subject-card h3 {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: var(--gray-800);
-            margin-bottom: 4px;
-        }
-
-        .subject-card .subject-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 16px;
-            font-size: 0.85rem;
-            color: var(--gray-500);
-            margin-bottom: 14px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .subject-card .subject-meta i {
-            margin-left: 4px;
-            color: var(--primary);
-        }
-
-        .subject-card .exam-date {
-            background: var(--primary-bg);
-            padding: 10px 14px;
-            border-radius: var(--radius);
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--gray-700);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .subject-card .exam-date i {
-            color: var(--primary);
-        }
-
-        .subject-card .card-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-primary {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 50px;
-            border: none;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            margin: 0 auto 16px;
+            font-size: 2.5rem;
             color: white;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Cairo', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
         }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: scale(1.02);
-            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+        .login-logo h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #1a1a2e;
         }
-
-        .btn-primary:active:not(:disabled) {
-            transform: scale(0.97);
+        .login-logo h1 span {
+            color: #667eea;
         }
-
-        .btn-primary:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
+        .login-logo p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-top: 4px;
         }
-
-        .btn-primary.booked-btn {
-            background: linear-gradient(135deg, var(--success), #22c55e);
-            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
-        }
-
-        .btn-primary.pending-btn {
-            background: linear-gradient(135deg, var(--warning), #d97706);
-            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
-        }
-
-        .btn-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: 2px solid var(--gray-200);
-            background: transparent;
-            color: var(--gray-400);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .btn-icon:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-            background: var(--danger-bg);
-        }
-
-        .btn-icon:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        /* ===== PAYMENT SECTION ===== */
-        .payment-section {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: var(--radius-lg);
-            padding: 28px 32px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            margin-bottom: 28px;
-            transition: var(--transition);
-        }
-
-        [data-theme="dark"] .payment-section {
-            background: rgba(30, 41, 59, 0.85);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .payment-section h2 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--gray-800);
+        .demo-credentials {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 12px 16px;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #475569;
+            border: 1px dashed #94a3b8;
         }
-
-        .payment-section h2 i {
-            color: var(--primary);
+        .demo-credentials strong {
+            color: #667eea;
         }
-
-        .payment-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            align-items: flex-end;
+        .form-group {
+            margin-bottom: 18px;
         }
-
-        .payment-form .form-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .payment-form .form-group label {
+        .form-group label {
             display: block;
             font-weight: 700;
             font-size: 0.9rem;
-            color: var(--gray-700);
+            color: #334155;
             margin-bottom: 6px;
         }
-
-        .payment-form .form-group input,
-        .payment-form .form-group select {
+        .form-group label i {
+            color: #667eea;
+            margin-left: 6px;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper i {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        .input-wrapper input {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--gray-200);
-            border-radius: var(--radius);
+            padding: 14px 48px 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
             font-size: 1rem;
             font-family: 'Cairo', sans-serif;
-            background: rgba(255, 255, 255, 0.6);
-            color: var(--gray-800);
-            transition: var(--transition);
+            background: #f8fafc;
+            color: #1e293b;
+            transition: 0.3s;
         }
-
-        [data-theme="dark"] .payment-form .form-group input,
-        [data-theme="dark"] .payment-form .form-group select {
-            background: rgba(15, 23, 42, 0.6);
-            border-color: var(--gray-600);
-            color: var(--gray-200);
-        }
-
-        .payment-form .form-group input:focus,
-        .payment-form .form-group select:focus {
+        .input-wrapper input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            background: white;
         }
-
-        .btn-success {
-            padding: 12px 32px;
-            border-radius: 50px;
-            border: none;
-            background: linear-gradient(135deg, var(--success), #22c55e);
-            color: white;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Cairo', sans-serif;
+        .login-options {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
-            white-space: nowrap;
-        }
-
-        .btn-success:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.4);
-        }
-
-        /* ===== ADMIN DASHBOARD ===== */
-        .admin-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 28px;
-        }
-
-        .admin-stat-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius);
-            padding: 20px 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            text-align: center;
-            transition: var(--transition);
-        }
-
-        [data-theme="dark"] .admin-stat-card {
-            background: rgba(30, 41, 59, 0.85);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .admin-stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .admin-stat-card .stat-number {
-            font-size: 2.4rem;
-            font-weight: 900;
-            color: var(--primary);
-        }
-
-        .admin-stat-card .stat-label {
-            font-size: 0.95rem;
-            color: var(--gray-500);
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        /* ===== ADMIN BOOKINGS TABLE ===== */
-        .bookings-table-wrapper {
-            overflow-x: auto;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-
-        [data-theme="dark"] .bookings-table-wrapper {
-            background: rgba(30, 41, 59, 0.85);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .bookings-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95rem;
-        }
-
-        .bookings-table th {
-            background: var(--primary-bg);
-            color: var(--gray-700);
-            padding: 14px 16px;
-            text-align: right;
-            font-weight: 700;
-            border-bottom: 2px solid var(--gray-200);
-        }
-
-        .bookings-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--gray-200);
-            color: var(--gray-700);
-        }
-
-        .bookings-table tr:hover td {
-            background: rgba(37, 99, 235, 0.03);
-        }
-
-        .bookings-table .status-pill {
-            padding: 4px 14px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: inline-block;
-        }
-
-        .status-pill.approved {
-            background: var(--success-bg);
-            color: var(--success);
-        }
-
-        .status-pill.rejected {
-            background: var(--danger-bg);
-            color: var(--danger);
-        }
-
-        .status-pill.pending {
-            background: var(--warning-bg);
-            color: var(--warning);
-        }
-
-        .admin-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn-sm {
-            padding: 6px 16px;
-            border-radius: 50px;
-            border: none;
-            font-weight: 700;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .btn-sm.approve {
-            background: var(--success-bg);
-            color: var(--success);
-        }
-
-        .btn-sm.approve:hover {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-sm.reject {
-            background: var(--danger-bg);
-            color: var(--danger);
-        }
-
-        .btn-sm.reject:hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        /* ===== SUMMARY BAR ===== */
-        .summary-bar {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: var(--radius-lg);
-            padding: 18px 28px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
             justify-content: space-between;
-            gap: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            margin-top: 20px;
-        }
-
-        [data-theme="dark"] .summary-bar {
-            background: rgba(30, 41, 59, 0.8);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .summary-stats {
-            display: flex;
+            align-items: center;
+            margin: 12px 0 22px;
             flex-wrap: wrap;
-            gap: 20px 32px;
+            gap: 10px;
         }
-
-        .summary-stats .stat {
+        .remember-me {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #475569;
+            cursor: pointer;
+        }
+        .remember-me input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+        .forgot-link {
+            color: #667eea;
+            text-decoration: none;
             font-weight: 600;
-            color: var(--gray-700);
+            font-size: 0.9rem;
         }
-
-        .summary-stats .stat i {
-            font-size: 1.3rem;
-            color: var(--primary);
-            width: 28px;
-            text-align: center;
+        .forgot-link:hover {
+            text-decoration: underline;
         }
-
-        .summary-stats .stat .stat-value {
-            background: var(--gray-100);
-            padding: 2px 16px;
-            border-radius: 50px;
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             font-weight: 800;
-            font-size: 1.2rem;
-            color: var(--gray-800);
-            min-width: 32px;
+            font-size: 1.1rem;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+        }
+        .btn-login:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+        }
+        .btn-login:active {
+            transform: scale(0.97);
+        }
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .register-link {
             text-align: center;
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 0.95rem;
         }
-
-        .summary-stats .stat .stat-value.booked-value {
-            background: var(--success-bg);
-            color: var(--success);
+        .register-link a {
+            color: #667eea;
+            font-weight: 700;
+            text-decoration: none;
         }
-
-        /* ===== TOAST ===== */
-        .toast-container {
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        .toast {
             position: fixed;
             bottom: 30px;
             right: 30px;
             z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .toast {
             padding: 16px 24px;
-            border-radius: var(--radius);
-            background: var(--gray-900);
+            border-radius: 14px;
+            background: #1e293b;
             color: white;
-            box-shadow: var(--shadow-xl);
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             gap: 14px;
-            font-weight: 600;
-            font-size: 0.95rem;
             transform: translateX(120%);
-            animation: slideIn 0.4s ease forwards;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
+            transition: 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            max-width: 400px;
         }
-
+        .toast.show {
+            transform: translateX(0);
+        }
         .toast.success {
             background: linear-gradient(135deg, #065f46, #047857);
         }
-
         .toast.error {
             background: linear-gradient(135deg, #991b1b, #dc2626);
         }
-
-        .toast.warning {
-            background: linear-gradient(135deg, #92400e, #d97706);
-        }
-
         .toast i {
             font-size: 1.5rem;
-            flex-shrink: 0;
         }
-
-        .toast .toast-close {
-            margin-right: auto;
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: var(--transition);
-        }
-
-        .toast .toast-close:hover {
-            color: white;
-        }
-
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .subject-card:nth-child(1) { animation-delay: 0.05s; }
-        .subject-card:nth-child(2) { animation-delay: 0.1s; }
-        .subject-card:nth-child(3) { animation-delay: 0.15s; }
-        .subject-card:nth-child(4) { animation-delay: 0.2s; }
-        .subject-card:nth-child(5) { animation-delay: 0.25s; }
-        .subject-card:nth-child(6) { animation-delay: 0.3s; }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .app-header { padding: 12px 16px; }
-            .header-brand h1 { font-size: 1.2rem; }
-            .student-profile { padding: 16px 18px; flex-direction: column; align-items: stretch; gap: 12px; }
-            .profile-avatar { width: 48px; height: 48px; font-size: 1.4rem; align-self: center; }
-            .profile-info { justify-content: center; gap: 8px 16px; }
-            .profile-info .info-item { font-size: 0.85rem; }
-            .subjects-grid { grid-template-columns: 1fr; }
-            .payment-form { flex-direction: column; }
-            .payment-form .form-group { min-width: 100%; }
-            .summary-bar { flex-direction: column; align-items: stretch; gap: 12px; padding: 16px 18px; }
-            .summary-stats { justify-content: center; }
-            .toast-container { right: 16px; left: 16px; max-width: none; bottom: 16px; }
-            .toast { font-size: 0.85rem; padding: 14px 18px; }
-            .admin-stats { grid-template-columns: repeat(2, 1fr); }
-            .tabs-container { overflow-x: auto; flex-wrap: nowrap; padding: 6px 10px; }
-            .tab-btn { padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; }
-            .bookings-table-wrapper { padding: 12px; }
-            .bookings-table { font-size: 0.8rem; }
-            .bookings-table th, .bookings-table td { padding: 10px 12px; }
-        }
-
         @media (max-width: 480px) {
-            body { padding: 10px; }
-            .app-header { padding: 10px 12px; }
-            .header-brand .logo-icon { width: 40px; height: 40px; font-size: 1.2rem; }
-            .header-brand h1 { font-size: 1rem; }
-            .subject-card { padding: 18px 16px; }
-            .subject-card .card-actions { flex-wrap: wrap; }
-            .btn-primary { font-size: 0.85rem; padding: 10px 12px; }
-            .btn-icon { width: 38px; height: 38px; }
-            .summary-stats { gap: 12px 20px; flex-wrap: wrap; justify-content: center; }
-            .summary-stats .stat { font-size: 0.85rem; }
-            .admin-stats { grid-template-columns: 1fr; }
-            .payment-section { padding: 20px 16px; }
-            .payment-section h2 { font-size: 1.1rem; }
+            .login-card {
+                padding: 28px 20px 32px;
+            }
+            .login-logo .logo-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            .login-logo h1 {
+                font-size: 1.4rem;
+            }
+            .toast {
+                right: 16px;
+                left: 16px;
+                max-width: none;
+                bottom: 16px;
+                font-size: 0.85rem;
+                padding: 14px 18px;
+            }
         }
     </style>
 </head>
 <body>
-
-    <div class="app-container" id="app">
-        <!-- ===== HEADER ===== -->
-        <header class="app-header">
-            <div class="header-brand">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
                 <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
-                <h1>حجز <span>الامتحانات</span></h1>
+                <h1>منصة <span>الامتحانات</span></h1>
+                <p>تسجيل الدخول إلى حسابك</p>
             </div>
-            <div class="header-actions">
-                <div class="user-badge" id="userBadge">
-                    <i class="fas fa-user-circle"></i>
-                    <span id="userName">مرحباً، ضيف</span>
-                </div>
-                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
-                <button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</button>
+
+            <div class="demo-credentials">
+                <i class="fas fa-info-circle" style="color:#667eea;"></i>
+                للاختبار: <strong>student@example.com</strong> / <strong>password123</strong>
             </div>
-        </header>
 
-        <!-- ===== STUDENT PROFILE ===== -->
-        <div class="student-profile">
-            <div class="profile-avatar" id="profileAvatar">أ</div>
-            <div class="profile-info">
-                <div class="info-item"><i class="fas fa-user-graduate"></i><span id="studentName">أحمد محمد</span></div>
-                <div class="info-item"><i class="fas fa-id-card"></i><span id="studentClass">٣ث / علمي</span></div>
-                <div class="info-item"><i class="fas fa-school"></i><span id="studentSchool">مدرسة النخبة</span></div>
-                <div class="info-item"><i class="fas fa-phone"></i><span id="studentPhone">٠١٠٠٢٢٣٣٤٤٥</span></div>
-            </div>
-        </div>
-
-        <!-- ===== TABS ===== -->
-        <div class="tabs-container">
-            <button class="tab-btn active" data-tab="booking"><i class="fas fa-calendar-check"></i> حجز الامتحانات</button>
-            <button class="tab-btn" data-tab="payment"><i class="fas fa-credit-card"></i> الدفع</button>
-            <button class="tab-btn" data-tab="admin"><i class="fas fa-user-shield"></i> لوحة التحكم</button>
-        </div>
-
-        <!-- ===== TAB 1: BOOKING ===== -->
-        <div class="tab-content active" id="tab-booking">
-            <div class="subjects-grid" id="subjectsGrid"></div>
-            <div class="summary-bar">
-                <div class="summary-stats">
-                    <div class="stat"><i class="fas fa-book-open"></i><span>إجمالي المواد</span><span class="stat-value" id="totalCount">0</span></div>
-                    <div class="stat"><i class="fas fa-check-circle"></i><span>المحجوزة</span><span class="stat-value booked-value" id="bookedCount">0</span></div>
-                    <div class="stat"><i class="fas fa-clock"></i><span>المتبقية</span><span class="stat-value" id="remainingCount">0</span></div>
-                    <div class="stat"><i class="fas fa-hourglass-half"></i><span>قيد الانتظار</span><span class="stat-value" id="pendingCount" style="background:var(--warning-bg);color:var(--warning);">0</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== TAB 2: PAYMENT ===== -->
-        <div class="tab-content" id="tab-payment">
-            <div class="payment-section">
-                <h2><i class="fas fa-credit-card"></i> دفع رسوم الامتحانات</h2>
-                <p style="color:var(--gray-500);margin-bottom:20px;">قم بدفع رسوم الامتحانات عن طريق تحويل المبلغ إلى الحساب التالي، ثم قم برفع إيصال الدفع.</p>
-                
-                <div style="background:var(--primary-bg);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;border:1px solid rgba(37,99,235,0.1);">
-                    <p style="font-weight:600;color:var(--gray-700);"><i class="fas fa-university" style="color:var(--primary);"></i> معلومات الحساب البنكي:</p>
-                    <p style="color:var(--gray-600);margin-top:4px;">🏦 البنك: البنك الأهلي المصري</p>
-                    <p style="color:var(--gray-600);">📋 رقم الحساب: 1234567890</p>
-                    <p style="color:var(--gray-600);">👤 اسم المستفيد: منصة حجز الامتحانات</p>
-                    <p style="color:var(--gray-600);">💰 المبلغ: 150 ج.م لكل مادة</p>
-                </div>
-
-                <form class="payment-form" id="paymentForm">
-                    <div class="form-group">
-                        <label><i class="fas fa-user"></i> اسم الطالب</label>
-                        <input type="text" id="paymentName" placeholder="الاسم الكامل" required>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" placeholder="example@email.com" value="student@example.com" required>
+                        <i class="fas fa-envelope"></i>
                     </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-book"></i> المادة</label>
-                        <select id="paymentSubject" required>
-                            <option value="">اختر المادة</option>
-                        </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> كلمة المرور</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="••••••••" value="password123" required>
+                        <i class="fas fa-lock"></i>
                     </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-money-bill-wave"></i> المبلغ المدفوع</label>
-                        <input type="number" id="paymentAmount" placeholder="المبلغ" value="150">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-upload"></i> إيصال الدفع (صورة)</label>
-                        <input type="file" id="paymentReceipt" accept="image/*" required>
-                    </div>
-                    <button type="submit" class="btn-success"><i class="fas fa-paper-plane"></i> إرسال الدفع</button>
-                </form>
+                </div>
 
-                <div style="margin-top:20px;padding:16px;background:var(--warning-bg);border-radius:var(--radius);border:1px solid rgba(245,158,11,0.2);">
-                    <p style="color:var(--warning);font-weight:600;"><i class="fas fa-info-circle"></i> ملاحظة:</p>
-                    <p style="color:var(--gray-600);font-size:0.9rem;">سيتم مراجعة إيصال الدفع من قبل الإدارة، وسيتم تأكيد حجزك بعد الموافقة.</p>
+                <div class="login-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="rememberMe" checked> تذكرني
+                    </label>
+                    <a href="#" class="forgot-link" onclick="alert('سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني')">نسيت كلمة المرور؟</a>
                 </div>
-            </div>
 
-            <!-- Payment History -->
-            <div style="background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-radius:var(--radius-lg);padding:24px 28px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.6);">
-                <h3 style="display:flex;align-items:center;gap:10px;font-size:1.2rem;color:var(--gray-800);margin-bottom:16px;">
-                    <i class="fas fa-history" style="color:var(--primary);"></i> سجل المدفوعات
-                </h3>
-                <div id="paymentHistory">
-                    <p style="color:var(--gray-400);text-align:center;padding:20px;">لا توجد مدفوعات حتى الآن</p>
-                </div>
-            </div>
-        </div>
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <i class="fas fa-arrow-left"></i> تسجيل الدخول
+                </button>
+            </form>
 
-        <!-- ===== TAB 3: ADMIN ===== -->
-        <div class="tab-content" id="tab-admin">
-            <div class="admin-stats">
-                <div class="admin-stat-card">
-                    <div class="stat-number" id="adminTotalBookings">0</div>
-                    <div class="stat-label">إجمالي الحجوزات</div>
-                </div>
-                <div class="admin-stat-card" style="border-top:4px solid var(--warning);">
-                    <div class="stat-number" id="adminPendingBookings" style="color:var(--warning);">0</div>
-                    <div class="stat-label">قيد الانتظار</div>
-                </div>
-                <div class="admin-stat-card" style="border-top:4px solid var(--success);">
-                    <div class="stat-number" id="adminApprovedBookings" style="color:var(--success);">0</div>
-                    <div class="stat-label">تم القبول</div>
-                </div>
-                <div class="admin-stat-card" style="border-top:4px solid var(--danger);">
-                    <div class="stat-number" id="adminRejectedBookings" style="color:var(--danger);">0</div>
-                    <div class="stat-label">تم الرفض</div>
-                </div>
-                <div class="admin-stat-card" style="border-top:4px solid var(--primary);">
-                    <div class="stat-number" id="adminTotalPayments">0</div>
-                    <div class="stat-label">إجمالي المدفوعات</div>
-                </div>
-            </div>
-
-            <div class="bookings-table-wrapper">
-                <h3 style="display:flex;align-items:center;gap:10px;font-size:1.2rem;color:var(--gray-800);margin-bottom:16px;">
-                    <i class="fas fa-list" style="color:var(--primary);"></i> طلبات الحجز
-                </h3>
-                <div style="overflow-x:auto;">
-                    <table class="bookings-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>الطالب</th>
-                                <th>المادة</th>
-                                <th>التاريخ</th>
-                                <th>المبلغ</th>
-                                <th>الإيصال</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminBookingsTable">
-                            <tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:30px;">لا توجد طلبات حجز</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="register-link">
+                ليس لديك حساب؟ <a href="#" onclick="alert('سيتم توجيهك إلى صفحة التسجيل')">إنشاء حساب جديد</a>
             </div>
         </div>
     </div>
 
-    <!-- ===== TOAST CONTAINER ===== -->
-    <div class="toast-container" id="toastContainer"></div>
+    <div class="toast" id="toast">
+        <i class="fas fa-circle-check"></i>
+        <span id="toastMessage">تم تسجيل الدخول بنجاح</span>
+    </div>
 
     <script>
-        // ========================================
-        // FIREBASE CONFIG
-        // ========================================
         const firebaseConfig = {
             apiKey: "AIzaSyB0p0us6BuzD2ngzjhRnmUIhlOcBeRp0vQ",
             authDomain: "tok-tak-d6e17.firebaseapp.com",
@@ -1171,570 +333,59 @@
             projectId: "tok-tak-d6e17",
             storageBucket: "tok-tak-d6e17.appspot.com",
             messagingSenderId: "547062578826",
-            appId: "1:547062578826:web:aa285cf798341be07cb773",
-            measurementId: "G-7EMKEQKPVV"
+            appId: "1:547062578826:web:aa285cf798341be07cb773"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const database = firebase.database();
 
-        // ========================================
-        // STATE
-        // ========================================
-        let currentUser = null;
-        let userRole = 'student'; // 'student' or 'admin'
-        let bookingsData = [];
-        let subjectsData = [
-            { id: 1, name: 'اللغة العربية', icon: 'fa-book', date: '2026-06-15', time: '09:00 ص', price: 150 },
-            { id: 2, name: 'اللغة الإنجليزية', icon: 'fa-language', date: '2026-06-17', time: '11:00 ص', price: 150 },
-            { id: 3, name: 'الرياضيات', icon: 'fa-calculator', date: '2026-06-19', time: '09:00 ص', price: 150 },
-            { id: 4, name: 'الفيزياء', icon: 'fa-flask', date: '2026-06-21', time: '10:00 ص', price: 150 },
-            { id: 5, name: 'الكيمياء', icon: 'fa-vial', date: '2026-06-23', time: '09:00 ص', price: 150 },
-            { id: 6, name: 'الأحياء', icon: 'fa-dna', date: '2026-06-25', time: '11:00 ص', price: 150 },
-        ];
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        let toastTimeout;
 
-        // ========================================
-        // DOM REFS
-        // ========================================
-        const grid = document.getElementById('subjectsGrid');
-        const totalCountEl = document.getElementById('totalCount');
-        const bookedCountEl = document.getElementById('bookedCount');
-        const remainingCountEl = document.getElementById('remainingCount');
-        const pendingCountEl = document.getElementById('pendingCount');
-        const themeToggle = document.getElementById('themeToggle');
-        const toastContainer = document.getElementById('toastContainer');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userNameEl = document.getElementById('userName');
-        const studentNameEl = document.getElementById('studentName');
-        const profileAvatar = document.getElementById('profileAvatar');
-        const paymentSubject = document.getElementById('paymentSubject');
-        const paymentForm = document.getElementById('paymentForm');
-        const paymentHistory = document.getElementById('paymentHistory');
-        const adminBookingsTable = document.getElementById('adminBookingsTable');
-        const adminTotalBookings = document.getElementById('adminTotalBookings');
-        const adminPendingBookings = document.getElementById('adminPendingBookings');
-        const adminApprovedBookings = document.getElementById('adminApprovedBookings');
-        const adminRejectedBookings = document.getElementById('adminRejectedBookings');
-        const adminTotalPayments = document.getElementById('adminTotalPayments');
-
-        // ========================================
-        // THEME
-        // ========================================
-        function getPreferredTheme() {
-            if (localStorage.getItem('theme')) return localStorage.getItem('theme');
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-
-        function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-            const icon = themeToggle.querySelector('i');
-            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-
-        // ========================================
-        // TOAST
-        // ========================================
-        function showToast(message, type = 'success', duration = 3000) {
-            const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', warning: 'fa-triangle-exclamation' };
-            const toast = document.createElement('div');
+        function showToast(message, type = 'success') {
             toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <i class="fas ${icons[type] || icons.success}"></i>
-                <span>${message}</span>
-                <button class="toast-close"><i class="fas fa-xmark"></i></button>
-            `;
-            toastContainer.appendChild(toast);
-            const closeBtn = toast.querySelector('.toast-close');
-            closeBtn.addEventListener('click', () => toast.remove());
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.style.transform = 'translateX(120%)';
-                    toast.style.opacity = '0';
-                    setTimeout(() => toast.remove(), 300);
-                }
-            }, duration);
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ========================================
-        // AUTH
-        // ========================================
-        function checkAuthState() {
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    loadUserProfile(user.uid);
-                    loadBookings(user.uid);
-                    loadPayments(user.uid);
-                    userNameEl.textContent = `مرحباً، ${user.displayName || user.email || 'طالب'}`;
-                    studentNameEl.textContent = user.displayName || 'طالب';
-                    profileAvatar.textContent = (user.displayName || 'طالب')[0];
-                    showToast('✅ تم تسجيل الدخول بنجاح', 'success');
-                } else {
-                    // Show login page or redirect
-                    showToast('⚠️ الرجاء تسجيل الدخول', 'warning');
-                    // For demo, auto-login with demo account
-                    autoLogin();
-                }
-            });
-        }
-
-        function autoLogin() {
-            // Demo auto-login
-            auth.signInWithEmailAndPassword('student@example.com', 'password123')
-                .then(() => {
-                    showToast('✅ تم تسجيل الدخول تلقائياً', 'success');
-                })
-                .catch(() => {
-                    // If demo account doesn't exist, create it
-                    auth.createUserWithEmailAndPassword('student@example.com', 'password123')
-                        .then(userCredential => {
-                            return userCredential.user.updateProfile({ displayName: 'أحمد محمد' });
-                        })
-                        .then(() => {
-                            showToast('✅ تم إنشاء حساب تجريبي', 'success');
-                        })
-                        .catch(err => {
-                            showToast('⚠️ الرجاء تسجيل الدخول يدوياً', 'warning');
-                        });
-                });
-        }
-
-        function logout() {
-            auth.signOut().then(() => {
-                currentUser = null;
-                userNameEl.textContent = 'مرحباً، ضيف';
-                showToast('👋 تم تسجيل الخروج', 'warning');
-            });
-        }
-
-        // ========================================
-        // USER PROFILE
-        // ========================================
-        function loadUserProfile(uid) {
-            database.ref(`users/${uid}`).once('value').then(snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    studentNameEl.textContent = data.name || 'طالب';
-                    document.getElementById('studentClass').textContent = data.class || '٣ث / علمي';
-                    document.getElementById('studentSchool').textContent = data.school || 'مدرسة النخبة';
-                    document.getElementById('studentPhone').textContent = data.phone || '٠١٠٠٢٢٣٣٤٤٥';
-                    profileAvatar.textContent = (data.name || 'طالب')[0];
-                    userRole = data.role || 'student';
-                }
-            });
-        }
-
-        // ========================================
-        // BOOKINGS
-        // ========================================
-        function loadBookings(uid) {
-            database.ref(`bookings/${uid}`).on('value', snapshot => {
-                const data = snapshot.val();
-                bookingsData = [];
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        bookingsData.push({ id: key, ...data[key] });
-                    });
-                }
-                renderSubjects();
-                updateAdminDashboard();
-                updatePaymentHistory();
-            });
-        }
-
-        function getBookingStatus(subjectId) {
-            const booking = bookingsData.find(b => b.subjectId === subjectId);
-            if (!booking) return 'available';
-            return booking.status || 'pending';
-        }
-
-        function renderSubjects() {
-            const total = subjectsData.length;
-            const booked = bookingsData.filter(b => b.status === 'approved').length;
-            const pending = bookingsData.filter(b => b.status === 'pending').length;
-            const remaining = total - booked - pending;
-
-            totalCountEl.textContent = total;
-            bookedCountEl.textContent = booked;
-            remainingCountEl.textContent = remaining;
-            pendingCountEl.textContent = pending;
-
-            let html = '';
-            subjectsData.forEach(subj => {
-                const status = getBookingStatus(subj.id);
-                const isBooked = status === 'approved';
-                const isPending = status === 'pending';
-                const dateObj = new Date(subj.date + 'T00:00:00');
-                const formattedDate = dateObj.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-
-                let statusText = 'متاح';
-                let statusClass = 'available';
-                let btnClass = '';
-                let btnText = '<i class="fas fa-pen"></i> احجز الآن';
-                let disabled = false;
-
-                if (isBooked) {
-                    statusText = 'محجوز ✓';
-                    statusClass = 'booked';
-                    btnClass = 'booked-btn';
-                    btnText = '<i class="fas fa-check-circle"></i> تم الحجز';
-                    disabled = true;
-                } else if (isPending) {
-                    statusText = 'قيد الانتظار';
-                    statusClass = 'pending';
-                    btnClass = 'pending-btn';
-                    btnText = '<i class="fas fa-hourglass-half"></i> قيد المراجعة';
-                    disabled = true;
-                }
-
-                html += `
-                    <div class="subject-card ${isBooked ? 'booked-card' : isPending ? 'pending-card' : ''}" style="animation-delay:0.1s;">
-                        <div class="card-header">
-                            <div class="card-icon"><i class="fas ${subj.icon}"></i></div>
-                            <span class="status-badge ${statusClass}">${statusText}</span>
-                        </div>
-                        <h3>${subj.name}</h3>
-                        <div class="subject-meta">
-                            <span><i class="fas fa-calendar-day"></i> ${formattedDate}</span>
-                            <span><i class="fas fa-clock"></i> ${subj.time}</span>
-                            <span><i class="fas fa-money-bill-wave"></i> ${subj.price} ج.م</span>
-                        </div>
-                        <div class="exam-date">
-                            <i class="fas fa-stopwatch"></i> الامتحان: ${formattedDate} · ${subj.time}
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn-primary ${btnClass}" data-subject="${subj.id}" ${disabled ? 'disabled' : ''}>
-                                ${btnText}
-                            </button>
-                            ${isBooked ? `
-                                <button class="btn-icon" data-subject="${subj.id}" data-action="cancel">
-                                    <i class="fas fa-xmark"></i>
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            });
-
-            grid.innerHTML = html;
-
-            // Attach events
-            document.querySelectorAll('.btn-primary:not(:disabled)').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const subjectId = parseInt(this.dataset.subject);
-                    openBookingModal(subjectId);
-                });
-            });
-
-            document.querySelectorAll('.btn-icon[data-action="cancel"]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const subjectId = parseInt(this.dataset.subject);
-                    cancelBooking(subjectId);
-                });
-            });
-        }
-
-        // ========================================
-        // BOOKING MODAL (Simplified - uses confirm)
-        // ========================================
-        function openBookingModal(subjectId) {
-            const subject = subjectsData.find(s => s.id === subjectId);
-            if (!subject) return;
-
-            if (confirm(`هل أنت متأكد من رغبتك في حجز مادة "${subject.name}"؟\n\nالمبلغ: ${subject.price} ج.م\nسيتم توجيهك إلى صفحة الدفع.`)) {
-                // Create pending booking
-                const bookingRef = database.ref(`bookings/${currentUser.uid}`).push();
-                bookingRef.set({
-                    subjectId: subject.id,
-                    subjectName: subject.name,
-                    date: subject.date,
-                    time: subject.time,
-                    price: subject.price,
-                    status: 'pending',
-                    createdAt: Date.now(),
-                    studentName: studentNameEl.textContent
-                }).then(() => {
-                    showToast(`⏳ تم إرسال طلب حجز ${subject.name} للمراجعة`, 'warning');
-                    showToast('💳 يرجى التوجه إلى صفحة الدفع لإكمال العملية', 'warning');
-                    // Switch to payment tab
-                    switchTab('payment');
-                    loadPayments(currentUser.uid);
-                }).catch(err => {
-                    showToast('❌ حدث خطأ في الحجز', 'error');
-                });
-            }
-        }
-
-        function cancelBooking(subjectId) {
-            const booking = bookingsData.find(b => b.subjectId === subjectId);
-            if (!booking) return;
-
-            if (confirm(`هل أنت متأكد من إلغاء حجز ${booking.subjectName}؟`)) {
-                database.ref(`bookings/${currentUser.uid}/${booking.id}`).remove()
-                    .then(() => {
-                        showToast(`❌ تم إلغاء حجز ${booking.subjectName}`, 'warning');
-                    })
-                    .catch(err => {
-                        showToast('❌ حدث خطأ في الإلغاء', 'error');
-                    });
-            }
-        }
-
-        // ========================================
-        // PAYMENTS
-        // ========================================
-        function loadPayments(uid) {
-            database.ref(`payments/${uid}`).on('value', snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    const payments = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-                    renderPaymentHistory(payments);
-                    updateAdminPayments(payments);
-                }
-            });
-        }
-
-        function renderPaymentHistory(payments) {
-            if (!payments || payments.length === 0) {
-                paymentHistory.innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:20px;">لا توجد مدفوعات حتى الآن</p>';
-                return;
-            }
-
-            let html = '';
-            payments.reverse().forEach(p => {
-                const statusClass = p.status === 'approved' ? 'approved' : p.status === 'rejected' ? 'rejected' : 'pending';
-                const statusText = p.status === 'approved' ? '✓ مقبول' : p.status === 'rejected' ? '✗ مرفوض' : '⏳ قيد المراجعة';
-                html += `
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--gray-200);flex-wrap:wrap;gap:8px;">
-                        <div>
-                            <strong>${p.subjectName}</strong>
-                            <span style="color:var(--gray-500);font-size:0.9rem;margin-right:12px;">${new Date(p.createdAt).toLocaleDateString('ar-EG')}</span>
-                        </div>
-                        <div>
-                            <span style="font-weight:700;color:var(--gray-700);">${p.amount} ج.م</span>
-                            <span class="status-pill ${statusClass}" style="margin-right:12px;">${statusText}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            paymentHistory.innerHTML = html;
-        }
-
-        // ========================================
-        // PAYMENT FORM
-        // ========================================
-        function populatePaymentSubjects() {
-            paymentSubject.innerHTML = '<option value="">اختر المادة</option>';
-            subjectsData.forEach(s => {
-                paymentSubject.innerHTML += `<option value="${s.id}">${s.name} - ${s.price} ج.م</option>`;
-            });
-        }
-
-        paymentForm.addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
 
-            if (!currentUser) {
-                showToast('⚠️ الرجاء تسجيل الدخول أولاً', 'error');
+            if (!email || !password) {
+                showToast('⚠️ الرجاء إدخال البريد الإلكتروني وكلمة المرور', 'error');
                 return;
             }
 
-            const name = document.getElementById('paymentName').value.trim();
-            const subjectId = parseInt(document.getElementById('paymentSubject').value);
-            const amount = parseFloat(document.getElementById('paymentAmount').value);
-            const fileInput = document.getElementById('paymentReceipt');
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '<span class="spinner"></span> جاري الدخول...';
+            btn.disabled = true;
 
-            if (!name || !subjectId || !amount || !fileInput.files[0]) {
-                showToast('⚠️ الرجاء ملء جميع الحقول', 'error');
-                return;
-            }
-
-            const subject = subjectsData.find(s => s.id === subjectId);
-            if (!subject) {
-                showToast('⚠️ المادة غير موجودة', 'error');
-                return;
-            }
-
-            // Read file as base64 for demo (in real app, upload to storage)
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const receiptData = e.target.result;
-
-                const paymentRef = database.ref(`payments/${currentUser.uid}`).push();
-                paymentRef.set({
-                    studentName: name,
-                    subjectId: subject.id,
-                    subjectName: subject.name,
-                    amount: amount,
-                    receipt: receiptData.substring(0, 100) + '...', // Truncated for demo
-                    status: 'pending',
-                    createdAt: Date.now()
-                }).then(() => {
-                    showToast('✅ تم إرسال إيصال الدفع بنجاح، في انتظار المراجعة', 'success');
-                    paymentForm.reset();
-                    loadPayments(currentUser.uid);
-                }).catch(err => {
-                    showToast('❌ حدث خطأ في إرسال الدفع', 'error');
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    showToast('✅ تم تسجيل الدخول بنجاح!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'booking.html';
+                    }, 1500);
+                })
+                .catch(error => {
+                    let msg = '❌ فشل تسجيل الدخول';
+                    if (error.code === 'auth/user-not-found') msg = '⚠️ هذا البريد غير مسجل';
+                    else if (error.code === 'auth/wrong-password') msg = '⚠️ كلمة المرور غير صحيحة';
+                    else if (error.code === 'auth/invalid-email') msg = '⚠️ البريد الإلكتروني غير صحيح';
+                    showToast(msg, 'error');
+                    btn.innerHTML = '<i class="fas fa-arrow-left"></i> تسجيل الدخول';
+                    btn.disabled = false;
                 });
-            };
-            reader.readAsDataURL(fileInput.files[0]);
         });
 
-        // ========================================
-        // ADMIN DASHBOARD
-        // ========================================
-        function updateAdminDashboard() {
-            // Only show admin tab for admin users
-            const adminTab = document.querySelector('[data-tab="admin"]');
-            if (userRole === 'admin') {
-                adminTab.style.display = 'flex';
-            } else {
-                adminTab.style.display = 'none';
-            }
-
-            // Load all bookings from all users
-            database.ref('bookings').on('value', snapshot => {
-                const data = snapshot.val();
-                const allBookings = [];
-                if (data) {
-                    Object.keys(data).forEach(uid => {
-                        Object.keys(data[uid]).forEach(key => {
-                            allBookings.push({
-                                id: key,
-                                uid: uid,
-                                ...data[uid][key]
-                            });
-                        });
-                    });
-                }
-                renderAdminTable(allBookings);
-                updateAdminStats(allBookings);
-            });
-        }
-
-        function renderAdminTable(bookings) {
-            if (!bookings || bookings.length === 0) {
-                adminBookingsTable.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:30px;">لا توجد طلبات حجز</td></tr>';
-                return;
-            }
-
-            let html = '';
-            bookings.reverse().forEach((b, index) => {
-                const statusClass = b.status === 'approved' ? 'approved' : b.status === 'rejected' ? 'rejected' : 'pending';
-                const statusText = b.status === 'approved' ? 'مقبول ✓' : b.status === 'rejected' ? 'مرفوض ✗' : 'قيد المراجعة';
-                const dateStr = new Date(b.createdAt).toLocaleDateString('ar-EG');
-
-                html += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${b.studentName || 'غير معروف'}</td>
-                        <td>${b.subjectName}</td>
-                        <td>${dateStr}</td>
-                        <td>${b.price || '---'} ج.م</td>
-                        <td><button class="btn-sm approve" onclick="viewReceipt('${b.id}')"><i class="fas fa-eye"></i></button></td>
-                        <td><span class="status-pill ${statusClass}">${statusText}</span></td>
-                        <td>
-                            <div class="admin-actions">
-                                ${b.status === 'pending' ? `
-                                    <button class="btn-sm approve" onclick="adminAction('${b.uid}','${b.id}','approve')"><i class="fas fa-check"></i> قبول</button>
-                                    <button class="btn-sm reject" onclick="adminAction('${b.uid}','${b.id}','reject')"><i class="fas fa-times"></i> رفض</button>
-                                ` : `
-                                    <span style="color:var(--gray-400);font-size:0.8rem;">تم المعالجة</span>
-                                `}
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            adminBookingsTable.innerHTML = html;
-        }
-
-        function updateAdminStats(bookings) {
-            const total = bookings.length;
-            const pending = bookings.filter(b => b.status === 'pending').length;
-            const approved = bookings.filter(b => b.status === 'approved').length;
-            const rejected = bookings.filter(b => b.status === 'rejected').length;
-
-            adminTotalBookings.textContent = total;
-            adminPendingBookings.textContent = pending;
-            adminApprovedBookings.textContent = approved;
-            adminRejectedBookings.textContent = rejected;
-        }
-
-        function updateAdminPayments(payments) {
-            const total = payments ? payments.reduce((sum, p) => sum + p.amount, 0) : 0;
-            adminTotalPayments.textContent = total + ' ج.م';
-        }
-
-        // ========================================
-        // ADMIN ACTIONS (Global functions)
-        // ========================================
-        window.adminAction = function(uid, bookingId, action) {
-            const status = action === 'approve' ? 'approved' : 'rejected';
-            const msg = action === 'approve' ? 'قبول' : 'رفض';
-
-            if (confirm(`هل أنت متأكد من ${msg} هذا الحجز؟`)) {
-                database.ref(`bookings/${uid}/${bookingId}/status`).set(status)
-                    .then(() => {
-                        showToast(`✅ تم ${msg} الحجز بنجاح`, 'success');
-                        updateAdminDashboard();
-                    })
-                    .catch(err => {
-                        showToast('❌ حدث خطأ', 'error');
-                    });
-            }
-        };
-
-        window.viewReceipt = function(bookingId) {
-            showToast('📎 عرض الإيصال (تجريبي)', 'warning');
-        };
-
-        // ========================================
-        // TABS
-        // ========================================
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-        }
-
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                switchTab(this.dataset.tab);
-            });
+        auth.onAuthStateChanged(user => {
+            if (user) window.location.href = 'booking.html';
         });
-
-        // ========================================
-        // INIT
-        // ========================================
-        function init() {
-            // Theme
-            setTheme(getPreferredTheme());
-            themeToggle.addEventListener('click', () => {
-                const current = document.documentElement.getAttribute('data-theme');
-                setTheme(current === 'dark' ? 'light' : 'dark');
-            });
-
-            // Logout
-            logoutBtn.addEventListener('click', logout);
-
-            // Payment subjects
-            populatePaymentSubjects();
-
-            // Auth
-            checkAuthState();
-        }
-
-        // Start
-        init();
-
-        console.log('🚀 منصة حجز الامتحانات - متكاملة مع Firebase');
-        console.log('👤 مستخدم تجريبي: student@example.com / password123');
-        console.log('🔑 دور المدير: قم بتغيير userRole إلى "admin" في Firebase');
     </script>
-
 </body>
     </html>
