@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدفع | منصة حجز الامتحانات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .app-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding: 16px 24px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-brand .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.4rem;
+        }
+        .header-brand h1 {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #1a1a2e;
+        }
+        .header-brand h1 span {
+            color: #667eea;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: #f1f5f9;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+        .user-badge i {
+            color: #667eea;
+        }
+        .btn-back {
+            padding: 8px 18px;
+            border: 2px solid #667eea;
+            border-radius: 50px;
+            background: transparent;
+            color: #667eea;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+        }
+        .payment-section {
+            background: white;
+            border-radius: 24px;
+            padding: 32px 36px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 28px;
+        }
+        .payment-section h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .payment-section h2 i {
+            color: #667eea;
+        }
+        .bank-info {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        .bank-info p {
+            margin: 4px 0;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+        .bank-info p i {
+            color: #667eea;
+            width: 24px;
+        }
+        .bank-info .highlight {
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .form-group label i {
+            color: #667eea;
+            margin-left: 6px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-family: 'Cairo', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            transition: 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+        .form-group input[type="file"] {
+            padding: 12px;
+            background: white;
+            border: 2px dashed #e2e8f0;
+            cursor: pointer;
+        }
+        .form-group input[type="file"]:hover {
+            border-color: #667eea;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: white;
+            font-weight: 800;
+            font-size: 1.1rem;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
+        }
+        .btn-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.4);
+        }
+        .btn-submit:active {
+            transform: scale(0.97);
+        }
+        .payment-history {
+            background: white;
+            border-radius: 24px;
+            padding: 24px 28px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .payment-history h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .payment-history h3 i {
+            color: #667eea;
+        }
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .payment-item:last-child {
+            border-bottom: none;
+        }
+        .payment-item .info .name {
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .payment-item .info .date {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .payment-item .amount {
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .status-pill {
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .status-pill.approved {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+        .status-pill.rejected {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .status-pill.pending {
+            background: #fffbeb;
+            color: #f59e0b;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            padding: 16px 24px;
+            border-radius: 14px;
+            background: #1e293b;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transform: translateX(120%);
+            transition: 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            max-width: 400px;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast.success {
+            background: linear-gradient(135deg, #065f46, #047857);
+        }
+        .toast.error {
+            background: linear-gradient(135deg, #991b1b, #dc2626);
+        }
+        .toast.warning {
+            background: linear-gradient(135deg, #92400e, #d97706);
+        }
+        .toast i {
+            font-size: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 12px 16px;
+            }
+            .header-brand h1 {
+                font-size: 1.1rem;
+            }
+            .payment-section {
+                padding: 20px 18px;
+            }
+            .payment-section h2 {
+                font-size: 1.2rem;
+            }
+            .payment-history {
+                padding: 18px 16px;
+            }
+            .toast {
+                right: 16px;
+                left: 16px;
+                max-width: none;
+                bottom: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                <h1>الدفع <span>الإلكتروني</span></h1>
+            </div>
+            <div class="header-actions">
+                <div class="user-badge"><i class="fas fa-user-circle"></i> <span id="userName">مرحباً، طالب</span></div>
+                <a href="booking.html" class="btn-back"><i class="fas fa-arrow-right"></i> العودة</a>
+            </div>
+        </header>
+
+        <div class="payment-section">
+            <h2><i class="fas fa-credit-card"></i> دفع رسوم الامتحانات</h2>
+
+            <div class="bank-info">
+                <p><i class="fas fa-university"></i> <span class="highlight">معلومات الحساب البنكي:</span></p>
+                <p><i class="fas fa-building"></i> البنك: البنك الأهلي المصري</p>
+                <p><i class="fas fa-hashtag"></i> رقم الحساب: <span class="highlight">1234567890</span></p>
+                <p><i class="fas fa-user"></i> اسم المستفيد: منصة حجز الامتحانات</p>
+                <p><i class="fas fa-money-bill-wave"></i> المبلغ: <span class="highlight">150 ج.م</span> لكل مادة</p>
+            </div>
+
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> اسم الطالب</label>
+                    <input type="text" id="paymentName" placeholder="الاسم الكامل" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-book"></i> المادة</label>
+                    <select id="paymentSubject" required>
+                        <option value="">اختر المادة</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-money-bill-wave"></i> المبلغ المدفوع</label>
+                    <input type="number" id="paymentAmount" placeholder="المبلغ" value="150">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-upload"></i> إيصال الدفع (صورة)</label>
+                    <input type="file" id="paymentReceipt" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> إرسال الدفع</button>
+            </form>
+        </div>
+
+        <div class="payment-history">
+            <h3><i class="fas fa-history"></i> سجل المدفوعات</h3>
+            <div id="paymentHistory">
+                <p style="text-align:center;color:#94a3b8;padding:20px;">لا توجد مدفوعات حتى الآن</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-circle-check"></i>
+        <span id="toastMessage">تم إرسال الدفع بنجاح</span>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0p0us6BuzD2ngzjhRnmUIhlOcBeRp0vQ",
+            authDomain: "tok-tak-d6e17.firebaseapp.com",
+            databaseURL: "https://tok-tak-d6e17-default-rtdb.firebaseio.com",
+            projectId: "tok-tak-d6e17",
+            storageBucket: "tok-tak-d6e17.appspot.com",
+            messagingSenderId: "547062578826",
+            appId: "1:547062578826:web:aa285cf798341be07cb773"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        const subjectsData = [
+            { id: 1, name: 'اللغة العربية', price: 150 },
+            { id: 2, name: 'اللغة الإنجليزية', price: 150 },
+            { id: 3, name: 'الرياضيات', price: 150 },
+            { id: 4, name: 'الفيزياء', price: 150 },
+            { id: 5, name: 'الكيمياء', price: 150 },
+            { id: 6, name: 'الأحياء', price: 150 },
+        ];
+
+        let currentUser = null;
+
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        let toastTimeout;
+
+        function showToast(message, type = 'success') {
+            toast.className = `toast ${type}`;
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('userName').textContent = `مرحباً، ${user.displayName || 'طالب'}`;
+                document.getElementById('paymentName').value = user.displayName || '';
+                loadPayments(user.uid);
+                populateSubjects();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function populateSubjects() {
+            const select = document.getElementById('paymentSubject');
+            subjectsData.forEach(s => {
+                select.innerHTML += `<option value="${s.id}">${s.name} - ${s.price} ج.م</option>`;
+            });
+        }
+
+        function loadPayments(uid) {
+            database.ref(`payments/${uid}`).on('value', snapshot => {
+                const data = snapshot.val();
+                const history = document.getElementById('paymentHistory');
+                if (!data) {
+                    history.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:20px;">لا توجد مدفوعات حتى الآن</p>';
+                    return;
+                }
+                let html = '';
+                Object.keys(data).forEach(key => {
+                    const p = data[key];
+                    const statusClass = p.status === 'approved' ? 'approved' : p.status === 'rejected' ? 'rejected' : 'pending';
+                    const statusText = p.status === 'approved' ? 'مقبول ✓' : p.status === 'rejected' ? 'مرفوض ✗' : 'قيد المراجعة';
+                    const date = new Date(p.createdAt).toLocaleDateString('ar-EG');
+                    html += `
+                        <div class="payment-item">
+                            <div class="info">
+                                <span class="name">${p.subjectName}</span>
+                                <span class="date">${date}</span>
+                            </div>
+                            <div>
+                                <span class="amount">${p.amount} ج.م</span>
+                                <span class="status-pill ${statusClass}" style="margin-right:12px;">${statusText}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                history.innerHTML = html;
+            });
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!currentUser) {
+                showToast('⚠️ الرجاء تسجيل الدخول أولاً', 'error');
+                return;
+            }
+
+            const name = document.getElementById('paymentName').value.trim();
+            const subjectId = parseInt(document.getElementById('paymentSubject').value);
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const fileInput = document.getElementById('paymentReceipt');
+
+            if (!name || !subjectId || !amount || !fileInput.files[0]) {
+                showToast('⚠️ الرجاء ملء جميع الحقول', 'error');
+                return;
+            }
+
+            const subject = subjectsData.find(s => s.id === subjectId);
+            if (!subject) {
+                showToast('⚠️ المادة غير موجودة', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const receiptData = e.target.result.substring(0, 100) + '...';
+                const paymentRef = database.ref(`payments/${currentUser.uid}`).push();
+                paymentRef.set({
+                    studentName: name,
+                    subjectId: subject.id,
+                    subjectName: subject.name,
+                    amount: amount,
+                    receipt: receiptData,
+                    status: 'pending',
+                    createdAt: Date.now()
+                }).then(() => {
+                    showToast('✅ تم إرسال إيصال الدفع بنجاح، في انتظار المراجعة', 'success');
+                    document.getElementById('paymentForm').reset();
+                    document.getElementById('paymentName').value = name;
+                }).catch(err => {
+                    showToast('❌ حدث خطأ في إرسال الدفع', 'error');
+                });
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        });
+    </script>
+</body>
+</html>
