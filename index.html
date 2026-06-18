@@ -156,6 +156,7 @@
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
+            cursor: pointer;
         }
         .forgot-link:hover {
             text-decoration: underline;
@@ -213,6 +214,7 @@
             color: #667eea;
             font-weight: 700;
             text-decoration: none;
+            cursor: pointer;
         }
         .register-link a:hover {
             text-decoration: underline;
@@ -245,8 +247,22 @@
         .toast.error {
             background: linear-gradient(135deg, #991b1b, #dc2626);
         }
+        .toast.warning {
+            background: linear-gradient(135deg, #92400e, #d97706);
+        }
         .toast i {
             font-size: 1.5rem;
+        }
+        .toast .close-toast {
+            margin-right: auto;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .toast .close-toast:hover {
+            color: white;
         }
         @media (max-width: 480px) {
             .login-card {
@@ -306,7 +322,7 @@
                     <label class="remember-me">
                         <input type="checkbox" id="rememberMe" checked> تذكرني
                     </label>
-                    <a href="#" class="forgot-link" onclick="alert('سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني')">نسيت كلمة المرور؟</a>
+                    <span class="forgot-link" onclick="showToast('📧 سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني', 'warning')">نسيت كلمة المرور؟</span>
                 </div>
 
                 <button type="submit" class="btn-login" id="loginBtn">
@@ -315,42 +331,163 @@
             </form>
 
             <div class="register-link">
-                ليس لديك حساب؟ <a href="#" onclick="alert('سيتم توجيهك إلى صفحة التسجيل')">إنشاء حساب جديد</a>
+                ليس لديك حساب؟ <span onclick="showToast('📝 سيتم توجيهك إلى صفحة التسجيل', 'warning')" style="color:#667eea;font-weight:700;cursor:pointer;">إنشاء حساب جديد</span>
             </div>
         </div>
     </div>
 
     <div class="toast" id="toast">
-        <i class="fas fa-circle-check"></i>
+        <i class="fas fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage">تم تسجيل الدخول بنجاح</span>
+        <button class="close-toast" onclick="closeToast()"><i class="fas fa-times"></i></button>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyB0p0us6BuzD2ngzjhRnmUIhlOcBeRp0vQ",
-            authDomain: "tok-tak-d6e17.firebaseapp.com",
-            databaseURL: "https://tok-tak-d6e17-default-rtdb.firebaseio.com",
-            projectId: "tok-tak-d6e17",
-            storageBucket: "tok-tak-d6e17.appspot.com",
-            messagingSenderId: "547062578826",
-            appId: "1:547062578826:web:aa285cf798341be07cb773"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+        // ============================================
+        // SIMPLE AUTHENTICATION SYSTEM
+        // باستخدام LocalStorage بدلاً من Firebase Auth
+        // ============================================
 
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
         let toastTimeout;
 
+        // ============================================
+        // TOAST NOTIFICATIONS
+        // ============================================
         function showToast(message, type = 'success') {
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-xmark',
+                warning: 'fa-triangle-exclamation'
+            };
             toast.className = `toast ${type}`;
+            toastIcon.className = `fas ${icons[type] || icons.success}`;
             toastMessage.textContent = message;
             toast.classList.add('show');
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        function closeToast() {
+            toast.classList.remove('show');
+            clearTimeout(toastTimeout);
+        }
+
+        // ============================================
+        // USERS DATABASE (LocalStorage)
+        // ============================================
+        function getUsers() {
+            const users = localStorage.getItem('exam_users');
+            return users ? JSON.parse(users) : {};
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('exam_users', JSON.stringify(users));
+        }
+
+        // Create default users if none exist
+        function initUsers() {
+            const users = getUsers();
+            if (Object.keys(users).length === 0) {
+                users['student@example.com'] = {
+                    password: 'password123',
+                    name: 'أحمد محمد',
+                    class: '٣ث / علمي',
+                    school: 'مدرسة النخبة',
+                    phone: '٠١٠٠٢٢٣٣٤٤٥',
+                    role: 'student'
+                };
+                saveUsers(users);
+            }
+        }
+
+        // ============================================
+        // LOGIN FUNCTION
+        // ============================================
+        function loginUser(email, password) {
+            const users = getUsers();
+            const user = users[email];
+
+            if (!user) {
+                return { success: false, message: '⚠️ هذا البريد غير مسجل' };
+            }
+
+            if (user.password !== password) {
+                return { success: false, message: '⚠️ كلمة المرور غير صحيحة' };
+            }
+
+            // Save session
+            const session = {
+                email: email,
+                name: user.name,
+                class: user.class,
+                school: user.school,
+                phone: user.phone,
+                role: user.role || 'student',
+                loginTime: Date.now()
+            };
+            localStorage.setItem('exam_session', JSON.stringify(session));
+
+            return { success: true, message: '✅ تم تسجيل الدخول بنجاح!', user: session };
+        }
+
+        // ============================================
+        // REGISTER FUNCTION (Create new account)
+        // ============================================
+        function registerUser(email, password, name) {
+            const users = getUsers();
+
+            if (users[email]) {
+                return { success: false, message: '⚠️ هذا البريد مسجل مسبقاً' };
+            }
+
+            users[email] = {
+                password: password,
+                name: name || 'طالب جديد',
+                class: '',
+                school: '',
+                phone: '',
+                role: 'student'
+            };
+            saveUsers(users);
+
+            return { success: true, message: '✅ تم إنشاء الحساب بنجاح!' };
+        }
+
+        // ============================================
+        // CHECK SESSION (Auto-login)
+        // ============================================
+        function checkSession() {
+            const session = localStorage.getItem('exam_session');
+            if (session) {
+                try {
+                    const data = JSON.parse(session);
+                    // Check if session is still valid (24 hours)
+                    if (Date.now() - data.loginTime < 24 * 60 * 60 * 1000) {
+                        return data;
+                    } else {
+                        localStorage.removeItem('exam_session');
+                    }
+                } catch (e) {
+                    localStorage.removeItem('exam_session');
+                }
+            }
+            return null;
+        }
+
+        // ============================================
+        // LOGOUT FUNCTION
+        // ============================================
+        function logoutUser() {
+            localStorage.removeItem('exam_session');
+            showToast('👋 تم تسجيل الخروج', 'warning');
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -365,27 +502,71 @@
             btn.innerHTML = '<span class="spinner"></span> جاري الدخول...';
             btn.disabled = true;
 
-            auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    showToast('✅ تم تسجيل الدخول بنجاح!', 'success');
+            // Simulate network delay
+            setTimeout(() => {
+                const result = loginUser(email, password);
+
+                if (result.success) {
+                    showToast(result.message, 'success');
                     setTimeout(() => {
                         window.location.href = 'booking.html';
                     }, 1500);
-                })
-                .catch(error => {
-                    let msg = '❌ فشل تسجيل الدخول';
-                    if (error.code === 'auth/user-not-found') msg = '⚠️ هذا البريد غير مسجل';
-                    else if (error.code === 'auth/wrong-password') msg = '⚠️ كلمة المرور غير صحيحة';
-                    else if (error.code === 'auth/invalid-email') msg = '⚠️ البريد الإلكتروني غير صحيح';
-                    showToast(msg, 'error');
+                } else {
+                    showToast(result.message, 'error');
                     btn.innerHTML = '<i class="fas fa-arrow-left"></i> تسجيل الدخول';
                     btn.disabled = false;
-                });
+                }
+            }, 800);
         });
 
-        auth.onAuthStateChanged(user => {
-            if (user) window.location.href = 'booking.html';
-        });
+        // ============================================
+        // CREATE ACCOUNT (Demo)
+        // ============================================
+        function createDemoAccount() {
+            const result = registerUser('demo@example.com', 'demo123', 'مستخدم تجريبي');
+            if (result.success) {
+                showToast(result.message, 'success');
+            } else {
+                showToast(result.message, 'warning');
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        function init() {
+            initUsers();
+
+            // Check if already logged in
+            const session = checkSession();
+            if (session) {
+                window.location.href = 'booking.html';
+            }
+
+            // For demo: Create demo account on first load
+            const users = getUsers();
+            if (!users['demo@example.com']) {
+                createDemoAccount();
+            }
+
+            console.log('📚 مستخدمين متاحين للتسجيل:');
+            const allUsers = getUsers();
+            Object.keys(allUsers).forEach(email => {
+                console.log(`   📧 ${email} / 🔑 ${allUsers[email].password}`);
+            });
+            console.log('✅ نظام تسجيل الدخول يعمل باستخدام LocalStorage');
+        }
+
+        // Start
+        init();
+
+        // Make functions available globally
+        window.showToast = showToast;
+        window.closeToast = closeToast;
+        window.logoutUser = logoutUser;
+        window.checkSession = checkSession;
+        window.getUsers = getUsers;
+        window.registerUser = registerUser;
     </script>
 </body>
     </html>
